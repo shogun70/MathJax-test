@@ -1,0 +1,40 @@
+body {
+	background-color: #fff;
+}
+h1 {
+	font-size: 20pt;
+}
+label {
+	background-color: #ccc;
+	border: 2px solid #aaa;
+	display: inline-block;
+	margin: 0.2em; margin-left: 0;
+	padding: 0.2em;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
+}
+table {
+	table-layout: fixed;
+	border-collapse: collapse;
+	width: 100%;
+	border: 1px solid #aaa;
+	margin-left: 0;
+}
+caption {
+	width: auto;
+	background-color: #eee;
+	border: 1px solid #aaa;
+	padding: 0.2em;
+	-moz-border-radius: 4px 4px 0 0;
+	-webkit-border-radius: 4px 4px 0 0;
+	border-radius: 4px 4px 0 0;
+}
+th, td {
+	border: 1px solid #aaa;
+	padding: 0.2em;
+}
+tr { border: 1px solid #aaa; }
+th { text-align: left; }
+th, td { padding-left: 1em; padding-right: 1em; }
+input[type=text] { width: 20em; }

@@ -1,0 +1,235 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+<head>
+<title>MathJax Installation Checklist</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<style>
+body {
+	background-color: #fff;
+}
+h1 {
+	font-size: 20pt;
+}
+label {
+	background-color: #ccc;
+	border: 2px solid #aaa;
+	display: inline-block;
+	margin: 0.2em; margin-left: 0;
+	padding: 0.2em;
+	border-radius: 4px;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+}
+table {
+	border-collapse: collapse;
+	width: 100%;
+	border: 1px solid #aaa;
+	table-layout: fixed;
+	margin: 0.2em; margin-left: 0;
+}
+caption {
+	width: auto;
+	background-color: #ccc;
+	border: 2px solid #aaa;
+	padding: 0.2em;
+	border-radius: 4px 4px 0 0;
+	-moz-border-radius: 4px 4px 0 0;
+	-webkit-border-radius: 4px 4px 0 0;
+}
+th, td {
+	border: 1px solid #aaa;
+	padding: 0.2em;
+}
+input {	border: none; }
+input.duration { border: 1px solid #aaa; }
+input[name=waiting] { border: none; background-color: orange; color: white; text-align: center; }
+input[name=loading] { border: none; background-color: green; color: white; text-align: center; }
+</style>
+</head>
+<body>
+<h1>MathJax Installation Checklist</h1>
+
+<h2>Summary</h2>
+<p id="status"></p>
+<ul id="summary">
+</ul>
+
+<h2>Tests</h2>
+<ul id="messages">
+</ul>
+
+<form action="mailto:" method="post" enctype="text/plain">
+<div id="results">
+<table id="files">
+	<col style="width: 12em;" />
+	<col style="width: 4em;" />
+	<col style="width: 4em;" />
+	<col style="width: auto;" />
+	<thead>
+		<tr><th>File</th><th>Loaded</th><th>Gzip</th><th>Timeline</th></tr>
+	</thead>
+	<tbody id="files-table">
+		<tr class="template">
+			<td align="left" style="overflow: hidden;"><input name="name" readonly size="50" /></td>
+			<td align="center"><input type="checkbox" name="loaded" readonly /></td>
+			<td align="center"><input type="checkbox" name="gzip" readonly /></td>
+			<td align="left"><input class="duration" name="waiting" readonly /><input class="duration" name="loading" readonly /></td>
+		</tr>
+	</tbody>
+</table>
+</div>
+</form>
+
+</body>
+
+<script src="ui.js"></script>
+<script src="config.js"></script>
+<script>
+var mui = MathJaxUI, $ = mui.$, $$ = mui.$$,
+	extend = Object.extend, each = Object.each, forEach = Array.forEach, eachWord = String.eachWord;
+
+config.script = "../default/MathJax.js"; // FIXME should come from config.js
+
+var ui = {
+
+writeMessage: function(msg) {
+	var item = document.createElement("li");
+	item.innerHTML = msg;
+	$("#messages").appendChild(item);	
+},
+postMessage: function(msg) {
+	var text = "";
+	if (typeof msg === "object") {
+		text = msg.data;
+		var status = "", summary = "";
+		switch (msg.type) {
+			case "error":
+				status = "Problems have been found";
+				summary = msg.data;
+				break;
+			case "warning":
+				status = "Performance issues have been found";
+				summary = msg.data;
+				break;
+		}
+		if (status) this.updateStatus(status);
+		if (summary) this.postSummary(summary);
+	}
+	else text = msg;
+	this.writeMessage(text);
+},
+
+updateStatus: function(msg) {
+	$("#status").innerHTML = msg;
+},
+
+postSummary: function(msg) {
+	var item = document.createElement("li");
+	item.innerHTML = msg;
+	$("#summary").appendChild(item);	
+}
+
+}
+</script>
+<script id="__MathJax__" type="text/plain">
+  ui.postMessage("MathJax script has loaded");
+
+  MathJax.Hub.Config({
+	skipStartupTypeset: true,
+    extensions: ["tex2jax.js"],
+    jax: ["input/TeX","output/HTML-CSS"],
+    tex2jax: {
+		inlineMath: [["$","$"],["\\(","\\)"]],
+		displayMath: [["$$","$$"]]
+	}
+  });
+
+  ui.postMessage("MathJax configuration has completed");
+</script>
+<script>
+document.write('<script src="' + config.script +'">\n' + $("#__MathJax__").innerHTML + '\n<\/script>\n');
+</script>
+<script>
+if (!window.MathJax) {
+	ui.postMessage({ type: "error", data: "MathJax could not start" });
+	throw "MathJax could not be started";
+}
+
+var uriTable = new mui.DataTable($("#files"));
+
+
+var resources = [
+"MathJax.js",
+"extensions/tex2jax.js",
+"jax/input/TeX/config.js",
+"jax/input/TeX/jax.js",
+"jax/element/mml/jax.js",
+"jax/output/HTML-CSS/config.js",
+"jax/output/HTML-CSS/jax.js",
+"fonts/HTML-CSS/TeX/eot/MathJax_Main-Regular.eot",
+"fonts/HTML-CSS/TeX/otf/MathJax_Main-Regular.otf",
+"fonts/HTML-CSS/TeX/svg/MathJax_Main-Regular.svg",
+"fonts/HTML-CSS/TeX/png/Main/Regular/050/0020.png"
+].map(function(fname) { return { name: fname }; });
+
+var root = MathJax.Hub.config.root;
+var fetch = function(fname, callback) {
+	var url = root + "/" + fname + "?" + Date.now();
+	var t = {};
+	var rq = new XMLHttpRequest;
+	rq.onreadystatechange = function() {
+		var now = Date.now();
+		switch(rq.readyState) {
+			case 2:
+				t.headers = now;
+				break;
+			case 4:
+				t.complete = now;
+				callback(rq, t);
+				break;
+		}
+	}
+	rq.open("get", url, true);
+	rq.setRequestHeader("If-Modified-Since", "" + (new Date(0)).toUTCString());
+	rq.send();
+	t.start = Date.now();
+}
+
+var rcStats = {
+	maxTime: 0
+}
+var checkResource = function(res) {
+	var callback = MathJax.Callback(function(rq, t) {
+		var loaded = (rq.status == 200),
+			contentEncoding = rq.getResponseHeader("Content-Encoding"),
+			gzip = !!(loaded && /gzip|deflate/.test(contentEncoding)),
+			waiting = t.headers - t.start,
+			loading = t.complete - t.headers,
+			total = t.complete - t.start,
+			timelineMsg = "latency: " + waiting + " / download: " + loading + " / total: " + total;
+		Object.extend(res, {
+			loaded: loaded,
+			gzip: { value: gzip, title: contentEncoding },
+			waiting: { value: waiting, title: timelineMsg },
+			loading: { value: loading, title: timelineMsg },
+			total: total
+		});
+		if (res.total > rcStats.maxTime) rcStats.maxTime = res.total;
+	});
+	fetch(res.name, callback);
+	return callback;
+}
+
+resources.forEach(function(res) {
+	MathJax.Hub.queue.Push([checkResource, res]);
+});
+
+MathJax.Hub.queue.Push(function() {
+	uriTable.scale = 95 / rcStats.maxTime;
+	resources.forEach(function(res) {
+		uriTable.addRow(res);
+	});
+});
+</script>
+
+</html>

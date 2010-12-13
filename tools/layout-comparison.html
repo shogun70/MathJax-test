@@ -1,0 +1,624 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+<head>
+<title>MathJax Layout Comparison</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta content="IE=EmulateIE7" http-equiv="X-UA-Compatible">
+<style>
+body {
+	background-color: #fff;
+}
+h1 {
+	font-size: 20pt;
+}
+label {
+	background-color: #ccc;
+	border: 2px solid #aaa;
+	display: inline-block;
+	margin: 0.2em; margin-left: 0;
+	padding: 0.2em;
+	border-radius: 4px;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+}
+table {
+	border-collapse: collapse;
+	border: 1px solid #aaa;
+	table-layout: auto;
+	margin: 0.2em; margin-left: 0;
+}
+caption {
+	width: auto;
+	background-color: #ccc;
+	border: 2px solid #aaa;
+	padding: 0.2em;
+	border-radius: 4px 4px 0 0;
+	-moz-border-radius: 4px 4px 0 0;
+	-webkit-border-radius: 4px 4px 0 0;
+}
+th, td {
+	border: 1px solid #aaa;
+	padding: 0.2em;
+}
+.hidden {
+	display: none;
+}
+.exploratory {
+	color: #fff;
+}
+</style>
+<script src="ui.js"></script>
+<script src="config.js"></script>
+<script>
+/*
+ Basic Procedure
+ 1. Use MathJax to Typeset a page with pre-processed TeX equations.
+ This should ensure that all required resources have been loaded.
+ 2. Get all equation scripts (proto-jax) and perform all the following steps on each
+ 3. Process()
+ 4. Find the HTML frame for the equation
+ 5. Remove the frame from the document
+ 6. Traverse the equation DOM tree, building a map of pseudo-MathML-elements, listing all elements of the same depth together
+ 7. Every element is wrapped inside a span (or a div if the config asks for it)
+ 8. Insert the equation back into the DOM.
+ Steps 9-12 are performed on every element. If the config calls for batch mode then each step is performed on all elements of the same depth
+ before moving on to the next step.
+ 9. Measure height and width of the wrapper.
+ 10. Pad the element with a '{' character enclosed in a span
+ 11. Measure height and width of the wrapper
+ 12. Move the element out of the wrapper and remove the wrapper from the DOM
+ 
+ Timings are taken for MathJax processing, DOM preparation (steps 4-8) and adjustment (steps 9-12)
+ 
+ It is not valid to compare MathJax processing time to the other steps, since
+ - MathJax does a lot more work
+ - This performance testing does a lot more element dimension lookups, which are expensive
+ 
+ The only way to compare the two is to look at how much time is spent in offsetHeight, offsetWidth lookups.
+ Timestamps on browsers have millisecond granularity (seems to effectively be 10ms on IE) which is too coarse for this investigation.
+ You really have to use profiling tools on browsers that provide them - Firefox (with Firebug), Chrome, Safari and IE8. 
+*/
+
+var mui = MathJaxUI, $ = mui.$, $$ = mui.$$,
+	extend = Object.extend, each = Object.each, forEach = Array.forEach, eachWord = String.eachWord;
+
+// Default config
+Object.extend(config, {
+	equation: null,
+	count: 1,
+	script: '../MathJax.js',
+	batch: false,
+	absPosWrapper: false,
+	divWrapper: false,
+	static: false,
+	inlineBlock: false,
+	collapsedFrame: false,
+	lockHeight: false,
+	noClip: false,
+	noID: false,
+	inlineStyle: false,
+	noInlineStyle: false, // FIXME disabled
+	fixedPosFrame: false,
+	mathRemoved: false,
+	lookupStyles: false, // FIXME disabled
+	bookend: '<span style="width: 2em; height: 2em;">}</span>'
+});
+
+// Utilities
+mui.getOptions(function(key, val) {
+	val = decodeURIComponent(val);
+	config[key] = val;
+});
+
+</script>
+<script>
+if (config.static || config.inlineBlock || config.collapsedFrame) {
+
+document.write(
+'<style>\n',
+'.MathJax nobr span {',
+(config.inlineBlock ? 'display: inline-block;' : ''),
+(config.static ? 'position: static;' : ''),
+'}\n',
+(config.collapsedFrame ? '.MathJax_Processing { display: none; }\n' : ''),
+'</style>\n'
+);
+	
+}
+</script>
+
+</head>
+<body>
+<h1>MathJax Layout Comparison</h1>
+<form name="config">
+<label>Equation
+<select name="equation">
+	<option value="">Select All</option>
+	<option value="lorenz">The Lorenz Equations</option>
+	<option value="cauchy-schwarz">The Cauchy-Schwarz Inequality</option>
+	<option value="cross-product">A Cross Product Formula</option>
+	<option value="probability">The probability of getting k heads when flipping n coins is</option>
+	<option value="ramanujan">An Identity of Ramanujan</option>
+	<option value="rogers-ramanujan">A Rogers-Ramanujan Identity</option>
+	<option value="maxwell">Maxwell's Equations</option>
+</select>
+</label>
+
+<script id="lorenz" type="math/tex; mode=display">
+\begin{aligned}
+\dot{x} & = \sigma(y-x) \\
+\dot{y} & = \rho x - y - xz \\
+\dot{z} & = -\beta z + xy
+\end{aligned}
+</script>
+
+<script id="cauchy-schwarz" type="math/tex; mode=display">
+\left( \sum_{k=1}^n a_k b_k \right)^2 \leq \left( \sum_{k=1}^n a_k^2 \right) \left( \sum_{k=1}^n b_k^2 \right)
+</script>
+
+<script id="cross-product" type="math/tex; mode=display">
+\mathbf{V}_1 \times \mathbf{V}_2 =  \begin{vmatrix}
+\mathbf{i} & \mathbf{j} & \mathbf{k} \\
+\frac{\partial X}{\partial u} &  \frac{\partial Y}{\partial u} & 0 \\
+\frac{\partial X}{\partial v} &  \frac{\partial Y}{\partial v} & 0
+\end{vmatrix}
+</script>
+
+<script id="probability" type="math/tex; mode=display">
+P(E)   = {n \choose k} p^k (1-p)^{ n-k}
+</script>
+
+<script id="ramanujan" type="math/tex; mode=display">
+\frac{1}{\Bigl(\sqrt{\phi \sqrt{5}}-\phi\Bigr) e^{\frac25 \pi}} =
+1+\frac{e^{-2\pi}} {1+\frac{e^{-4\pi}} {1+\frac{e^{-6\pi}}
+{1+\frac{e^{-8\pi}} {1+\ldots} } } }
+</script>
+
+<script id="rogers-ramanujan" type="math/tex; mode=display">
+1 +  \frac{q^2}{(1-q)}+\frac{q^6}{(1-q)(1-q^2)}+\cdots =
+\prod_{j=0}^{\infty}\frac{1}{(1-q^{5j+2})(1-q^{5j+3})},
+\quad\quad \text{for} |q|<1.
+</script>
+
+<script id="maxwell" type="math/tex; mode=display">
+\begin{aligned}
+\nabla \times \vec{\mathbf{B}} -\, \frac1c\, \frac{\partial\vec{\mathbf{E}}}{\partial t} & = \frac{4\pi}{c}\vec{\mathbf{j}} \\   \nabla \cdot \vec{\mathbf{E}} & = 4 \pi \rho \\
+\nabla \times \vec{\mathbf{E}}\, +\, \frac1c\, \frac{\partial\vec{\mathbf{B}}}{\partial t} & = \vec{\mathbf{0}} \\
+\nabla \cdot \vec{\mathbf{B}} & = 0 \end{aligned}
+</script>
+
+<label title="How many equations to place in test page">Count <input type="text" size="4" name="count" /></label>
+<input type="submit" name="run" value="Run" />
+
+<fieldset><legend title="These effect Rebuild as well">MathJax options</legend>
+<label>Script location <input type="text" size="40" name="script" /></label>
+<label class="hidden" title="The default setting for 'position' style of spans is 'static'. IE only.">Static<input type="checkbox" name="static" /></label>
+<label title="The default setting for 'display' style of spans is 'inline-block'.">Inline-Block <input type="checkbox" name="inlineBlock" /></label>
+<label class="exploratory" title="Frame for math DOM is collapsed (style='display:none') during layout. Will destroy layout!">Collapsed frame <input type="checkbox" name="collapsedFrame" /></label>
+<label title="The height of equations is locked after rendering.">Lock height <input type="checkbox" name="lockHeight" /></label>
+</fieldset>
+<fieldset><legend>Rebuild options</legend>
+<label title="Perform dimension lookups, element bookends, etc in batches as appropriate">Batch <input type="checkbox" name="batch" /></label>
+<label title="Remove element IDs.">No ID <input type="checkbox" name="noID" /></label>
+<label class="hidden" title="Remove inline styles. Will destroy layout!!">No inline styles <input type="checkbox" name="noInlineStyle" /></label>
+<label title="Use inline styles directly on the element in the math DOM.">Inline styles <input type="checkbox" name="inlineStyle" /></label>
+<label title="Frame for math DOM uses fixed positioning during layout">Fixed frame <input type="checkbox" name="fixedPosFrame" /></label>
+<label class="exploratory" title="The math DOM is removed from the document during layout. All measurements should be zero.">Math removed <input type="checkbox" name="mathRemoved" /></label>
+<label title="Wrappers for math pseudo-elements are absolutely positioned">Absolute <input type="checkbox" name="absPosWrapper" /></label>
+<label title="Wrappers for math pseudo-elements are divs not spans">Use DIVs <input type="checkbox" name="divWrapper" /></label>
+<label class="exploratory" title="Don't use CSS clip. IE only.">No Clip <input type="checkbox" name="noClip" /></label>
+<label class="hidden" title="Perform additional style lookup.">Lookup styles <input type="checkbox" name="lookupStyles" /></label>
+<label>Bookend <input type="text" size="40" name="bookend" disabled /></label>
+</fieldset>
+<label>documentMode <input type="text" name="documentMode" disabled /></label>
+<label>compatMode <input type="text" name="compatMode" disabled /></label>
+</form>
+<script>
+(function() {
+
+var form = document.forms["config"];
+Array.forEach(form["equation"].options, function(option) {
+	if (option.value === config.equation) option.selected = true;
+});
+Array.forEach("script count bookend".split(/\s+/), function(name) {
+	form[name].value = config[name];
+});
+Array.forEach("batch lockHeight absPosWrapper divWrapper static inlineBlock collapsedFrame noClip noID noInlineStyle inlineStyle fixedPosFrame lookupStyles mathRemoved".split(/\s+/), function(name) {
+	form[name].checked = !!config[name];
+});
+Array.forEach("documentMode compatMode".split(/\s+/), function(name) {
+	form[name].setAttribute("value", document[name]);
+});
+})();
+</script>
+
+
+<table id="table">
+	<caption>Equation Processing Stats</caption>
+	<thead>
+		<tr>
+			<th>Eqn #</th>
+			<th title="Number of elements in the MathML pseudo-DOM tree">Size </th>
+			<th title="Height of the MathML pseudo-DOM tree">Height</th>
+			<th title="Size / Height">Ratio</th>
+			<th title="The MathJax Process call">Process (ms)</th>
+			<th title="Statting and wrapping the DOM tree">Prepare (ms)</th>
+			<th title="Dimension lookups and finalizing the DOM tree">Adjust (ms)</th>
+			<th title="Prepare + Adjust">Rebuild (ms)</th>
+			<th title="Cumulative offsetHeight">offsetHeight</th>
+			<th title="Cumulative offsetWidth">offsetWidth</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr class="template"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+	</tbody>
+</table>
+<small style="display: block;" >
+<label id="notes"><a href="#notes">Notes</a></label>
+<p>It is not valid to compare MathJax processing time to the Prepare and Adjust phases, since
+<ul>
+<li>MathJax Processing does a lot more work</li>
+<li>The Adjust phase does a lot more element dimension lookups</li>
+</ul>
+The main reason the MathJax processing time is measured is to provide a sanity check during development of the other tests. 
+</p>
+<p>The main purpose of this test is to investigate the potential benefit of batching DOM modification and element dimension lookups during math layout.
+ Therefore the most relevant timing data is the change in the Adjust phase between batched and non-batched runs.
+</p>
+<p>
+ A more accurate analysis would require timings of offsetHeight and offsetWidth lookups.
+ Timestamps on browsers have millisecond granularity (seems to effectively be 10ms on IE) which is too coarse for this investigation.
+ You really have to use profiling tools on browsers that provide them - Firefox (with Firebug), Chrome, Safari and IE8. 
+</p>
+</small>
+<small style="display: block;">
+<label id="todo"><a href="#todo">TODO</a></label>
+<ul>
+<li>Test for the impact of compatMode</li>
+<li>Automate the performing and recording of multiple runs so that the user doesn't have to record data to compare different configurations</li>
+<li>Putting the test code in an iframe would facilitate the above</li>
+<li>Allow config of bookend HTML</li>
+</ul>
+</small>
+<hr />
+<div id="runbox">
+
+<script>
+(function() {
+
+var form = document.forms["config"], select = form["equation"];
+var math = "", all = select.options[0].selected;
+Array.forEach(select.options, function(option) {
+	var equation = option.value;
+	if (!equation) return;
+	if (!all && !option.selected) return;
+	var script = $("#" + equation);
+	math += '<div><script type="math/tex; mode=display">' + script.innerHTML + '<\/script></div>\n';
+});
+for (var i=0; i<config.count; i++) document.write(math);
+
+})();
+</script>
+
+</div>
+</body>
+<script>
+var details = "notes todo".split(" ");
+var onclick = function(e) {
+	var el = this;
+	var block = el.parentNode;
+	if (block.style.height) block.style.height = "";
+	else {
+		var height = el.offsetHeight;
+		block.style.height = height + "px";
+		block.style.overflow = "hidden";
+	}
+	return false;
+}
+Array.forEach(details, function(id) {
+	var el = $("#" + id);
+	el.onclick = onclick;
+	el.onclick();
+});
+</script>
+
+<script id="__MathJax__" type="text/plain">
+    MathJax.Hub.Config({
+        jax: ["input/TeX", "output/HTML-CSS"],
+//		extensions: ["tex2jax.js"],
+		skipStartupTypeset: true,
+//		displayAlign: "left",
+		"HTML-CSS": { showMathMenu: false, scale: 100 }
+    });
+</script>
+<script>
+var text = $("#__MathJax__").innerHTML;
+document.write('<script src="', config.script, '" type="text/javascript">\n', text, '<', '/script>');
+</script>
+
+<script>
+
+// Box works by wrapping an element of interest, for the purpose of measuring and padding
+// When the box is finalized in the DOM the element is inserted before the wrapper and the wrapper removed from the DOM
+
+var Box = {
+
+isMathElement: function(node) {
+	if (node.nodeType !== 1) return false;
+	var className = node.className;
+	return (className && className !== "MathJax_strut");
+},
+
+wrapElement: (config.divWrapper) ? "div" : "span",
+
+methodOrder: "Measure Pad Measure Finalize".split(" "),
+
+Wrap: function(element) {
+	var parent = element.parentNode;
+	var wrapper = document.createElement(Box.wrapElement);
+	if (config.absPosWrapper) wrapper.style.cssText = "position: absolute; top: 0px; left: 0px;";
+	parent.insertBefore(wrapper, element);
+	wrapper.appendChild(element);
+	return wrapper;
+},
+
+Finalize: function(element) {
+	var wrapper = element.parentNode;
+	var parent = wrapper.parentNode;
+	parent.insertBefore(element, wrapper);
+	/*
+	 NOTE lookupStyles is not an advertized option.
+	 - it is impossible to tell whether it just works out the camputedStyle, or also does a reflow
+	 - in Firefox it is negligible, in Opera it increases the rebuilding time by 25%.
+	 - probably it is insignificant when it doesn't cause a reflow
+	 - it will break when using pieceWise rebuilding
+	*/
+	if (config.lookupStyles) { 
+		var style = (window.getComputedStyle) ? window.getComputedStyle(element, null) : element.currentStyle;
+		var text = style.textAlign; // [ style.position, style.display, style.borderLeft, style.textAlign ] .join(" ");
+	}
+	parent.removeChild(wrapper);
+},
+
+Measure: function(element, equation) { // FIXME orthogonality
+	var wrapper = element.parentNode;
+	equation.offsetWidth += element.offsetWidth;
+	equation.offsetHeight += element.offsetHeight;
+},
+
+Pad: function(element) {
+	var wrapper = element.parentNode;
+	var strut = document.createElement("div");
+	strut.innerHTML = config.bookend;
+	for (var node=strut.firstChild; node; node=node.nextSibling) wrapper.appendChild(node);
+}
+
+
+}
+
+var Equation = function(script) {
+	this.script = script;
+	this.offsetWidth = 0;
+	this.offsetHeight = 0;
+}
+
+Equation.defaultStyle = {
+	"text-align": "left",
+//	"vertical-align": "inherit",
+	display: "inline",
+	position: "static",
+	float: "none",
+	width: "auto",
+	height: "auto",
+	top: 0,
+	bottom: "auto",
+	left: 0,
+	right: "auto",
+	"line-height": "normal",
+	"font-size": "auto",
+	"margin-left": 0,
+	"margin-right": 0,
+	"margin-top": 0,
+	"margin-bottom": 0,
+	"padding-left": 0,
+	"padding-right": 0,
+	"padding-top": 0,
+	"padding-bottom": 0,
+	"border-left-width": 0,
+	"border-right-width": 0,
+	"border-top-width": 0,
+	"border-bottom-width": 0
+}
+
+Equation.camelCaseNames = {};
+(function() {
+	var defStyle = Equation.defaultStyle;
+	for (var name in defStyle) {
+		var camelCaseName = "";
+		Array.forEach(name.split("-"), function(part, i) { camelCaseName += (i == 0) ? part : part.charAt(0).toUpperCase() + part.slice(1); });
+		Equation.camelCaseNames[name] = camelCaseName;
+	}
+	
+})();
+
+Equation.prototype = {
+
+Process: function() {
+	this.script.parentNode.style.display = "none";
+	var callback = MathJax.Hub.Process(this.script);
+	return callback;
+},
+
+Prepare: function() {
+	this.script.parentNode.style.display = "";
+	this.display = this.script.previousSibling;
+	this.frame = $$("nobr", this.display)[0];
+
+	var frag = this.frag = document.createDocumentFragment();
+	frag.appendChild(this.frame.firstChild);
+	
+	// traverse the tree creating a nodeMap of the depth of math elements 
+	var nodeMap = [];
+	var level = 0, size = 0;
+	var processElement = function(element) {
+		if (config.inlineStyle) {
+			var defStyle = Equation.defaultStyle, cssText = element.style.cssText;
+			for (var name in defStyle) {
+				var camelCaseName = Equation.camelCaseNames[name];
+				var val = element.style[camelCaseName];
+				cssText += name + ": " + (val || defStyle[name]) + " !important; ";
+			}
+			element.style.cssText = cssText;
+		}
+		/*
+		 NOTE noInlineStyle is not an advertized option, as:
+		 - it destroys the layout (obviously)
+		 - the results were ambiguous
+		*/
+		if (config.noInlineStyle) {
+			element.removeAttribute("style");
+			if (element.nodeName.toLowerCase() === "img") element.style.display = "none";
+		}
+		var isMath = Box.isMathElement(element);
+		if (isMath) {
+			if (config.noID) element.removeAttribute("id");
+			size++;
+			if (!nodeMap[level]) nodeMap[level] = [];
+			nodeMap[level].push(element);
+			level++;
+		}
+		for (var node=element.firstChild; node; node=node.nextSibling) {
+			if (node.nodeType === 1) processElement(node);
+		}
+		if (isMath) level--;
+	}
+	processElement(frag.firstChild);
+//	log("Exit level (should be 0): " + level);
+	this.nodeMap = nodeMap = nodeMap.reverse();
+	this.height = nodeMap.length;
+	this.size = size;
+	
+	// wrap all math elements
+	Array.forEach(nodeMap, function(nodes) {
+		Array.forEach(nodes, function(node) {
+			Box.Wrap(node);
+		});
+	});
+
+	if (config.fixedPosFrame) {
+		this.frame.style.cssText = "width: 0px; height: 0px; visbility: hidden; overflow: hidden; position: fixed; top: 0px; left: 0px; ";
+	}
+	if (!config.mathRemoved) {		
+		this.frame.appendChild(this.frag.firstChild);
+		delete this.frag;
+	}
+},
+
+Adjust: function() {
+	var equation = this;
+	var methods = Box.methodOrder;
+	Array.forEach (this.nodeMap, function(nodes) {
+	if (config.batch) {
+		Array.forEach(methods, function(fnname) {
+			Array.forEach(nodes, function(node) {
+				Box[fnname](node, equation);
+			});
+		});
+	}
+	else {
+		Array.forEach(nodes, function(node) {
+			Array.forEach(methods, function(fnname) {
+				Box[fnname](node, equation);
+			});
+		});
+	}
+	});
+	delete this.nodeMap;
+	if (config.fixedPosFrame) {
+		this.frame.style.cssText = null;
+	}
+	if (config.mathRemoved) {		
+		this.frame.appendChild(this.frag.firstChild);
+		delete this.frag;
+	}
+	if (config.lockHeight) {
+		this.display.style.height = this.display.offsetHeight + "px";
+		this.display.style.overflow = "hidden";
+	}
+}
+
+}
+
+
+var timeStamps = [];
+//var eqnList = [];
+var tBody = $("#table").tBodies[0];
+
+var Init = function() {
+
+var total = {
+	size : 0,
+	height : 0,
+	process: 0,
+	prepare: 0,
+	adjust: 0
+}
+
+var mathScripts = [];
+Array.forEach($$("script", $("#runbox")), function(script) { if (script.type == "math/tex; mode=display") mathScripts.push(script); });
+Array.forEach(mathScripts, function(script, eqnIndex) {
+	var t = timeStamps;
+	var eqn = new Equation(script);
+//	eqnList.push(eqn);		
+	MathJax.Hub.queue.Push(
+		function() { t[0] = +(new Date); },
+		["Process", eqn],
+		function() { t[1] = +(new Date); },
+		["Prepare", eqn],
+		function() { t[2] = +(new Date); },
+		["Adjust", eqn],
+		function() {
+			t[3] = +(new Date);
+			var template = tBody.rows[tBody.rows.length - 1];
+			var row = template.cloneNode(true);
+			tBody.insertBefore(row, template);
+			row.className = "";
+			var procTime = t[1] - t[0], prepTime =  t[2] - t[1], adjustTime = t[3] - t[2];
+			var data = [ (eqnIndex + 1), eqn.size, eqn.height, Math.round(eqn.size * 100 / eqn.height) / 100, procTime, prepTime, adjustTime, (prepTime + adjustTime), eqn.offsetHeight, eqn.offsetWidth ];
+			Array.forEach(row.cells, function(cell, i) {
+				cell.innerHTML = data[i];
+			});
+			total.size += eqn.size;
+			total.height += eqn.height;
+			total.process += procTime;
+			total.prepare += prepTime;
+			total.adjust += adjustTime;
+		},
+		["Delay", MathJax.Callback, 1]
+	);
+});
+
+MathJax.Hub.queue.Push(function() {
+			var row = tBody.rows[tBody.rows.length - 1];
+			row.className = "";
+			var data = [ "Totals", total.size, total.height, Math.round(total.size * 100 / total.height) / 100, total.process, total.prepare, total.adjust, (total.prepare + total.adjust) ];
+			Array.forEach(row.cells, function(cell, i) {
+				if (data[i] != null) cell.innerHTML = data[i];
+			});	
+})
+
+
+}
+
+var browser = MathJax.Hub.Browser;
+if (config.noClip && browser.isMSIE) MathJax.Hub.queue.Push(function() {
+	MathJax.OutputJax["HTML-CSS"].msieClipRectBug = true;
+})
+
+//MathJax.Hub.queue.Push(["Typeset", MathJax.Hub]);
+
+
+if (config.run) MathJax.Hub.queue.Push(Init);
+
+</script>
+</html>

@@ -1,0 +1,607 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+<head>
+<title>MathJax Diagnostix</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<style>
+html {
+	border: none;
+}
+body {
+	overflow-x: hidden;
+	overflow-y: scroll;
+}
+
+table {
+	overflow-y: scroll;
+	height: auto;
+}
+body {
+	background-color: #fff;
+}
+h1 {
+	font-size: 20pt;
+}
+label {
+	background-color: #eee;
+	border: 1px solid #aaa;
+	display: inline-block;
+	margin: 0.2em; margin-left: 0;
+	padding: 0.2em;
+	border-radius: 4px;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+}
+ul.tabs {
+	list-style-position: inside;
+	list-style-type: none;
+	padding-left: 0px;
+	margin: 0px;
+	line-height: 1.4em;
+}
+ul.tabs li {
+	display: inline;
+	background-color: #fff;
+	border: 1px solid #aaa;
+	border-bottom: none;
+	padding: 0.2em;
+	border-radius: 4px 4px 0 0;
+	-moz-border-radius: 4px 4px 0 0;
+	-webkit-border-radius: 4px 4px 0 0;
+}
+ul.tabs li.selected {
+	background-color: #eee;
+	z-index: 2;
+}
+ul.tabs a, ul.tabs a:visited {
+	text-decoration: none;
+	color: inherit;
+}
+label {
+	background-color: #ccc;
+	border: 2px solid #aaa;
+	display: inline-block;
+	margin: 0.2em; margin-left: 0;
+	padding: 0.2em;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
+}
+table {
+	z-index: 1;
+	table-layout: fixed;
+	border-collapse: collapse;
+	width: 100%;
+	border: 1px solid #aaa;
+	margin-left: 0;
+}
+caption {
+	width: auto;
+	background-color: #eee;
+	border: 1px solid #aaa;
+	padding: 0.2em;
+	-moz-border-radius: 4px 4px 0 0;
+	-webkit-border-radius: 4px 4px 0 0;
+	border-radius: 4px 4px 0 0;
+}
+th, td {
+	border: 1px solid #aaa;
+	padding: 0.2em;
+}
+tr { border: 1px solid #aaa; }
+th { text-align: left; }
+th, td { padding-left: 1em; padding-right: 1em; }
+input[type=text] { width: 20em; }
+
+#basic tbody {
+	border: 1px solid #ccc;
+}
+#basic tr, #basic th, #basic td {
+	border: none;
+}
+</style>
+</head>
+<body>
+<form action="mailto:" method="post" enctype="text/plain">
+<div class="tabbox">
+	<ul class="tabs">
+		<li><a href="#basic">Basic</a></li>
+		<li><a href="#advanced">Advanced</a></li>
+	</ul>
+	<div class="tabpanels">
+<table id="basic">
+	<caption>Common troubleshooting aids</caption>
+	<col />
+	<col width="20%" />
+	<tbody class="template">
+		<tr><th></th><td></td></tr>
+		<tr><td></td><td></td></tr>
+	</tbody>
+</table>
+<table id="advanced">
+	<caption>Complete view of document and MathJax properties</caption>
+	<col />
+	<col width="10%" />
+	<col width="20%" />
+	<thead>
+		<tr><th>Property Name</th><th>Type</th><th>Value</th></tr>
+	</thead>
+	<tbody>
+		<tr class="template"><td></td><td></td><td></td></tr>
+	</tbody>
+</table>
+	</div>
+</div>
+</form>
+</body>
+<script src="ui.js"></script>
+<script>
+var mui = MathJaxUI, $ = mui.$, $$ = mui.$$,
+	extend = Object.extend, each = Object.each, forEach = Array.forEach, eachWord = String.eachWord;
+
+var context = (window.MathJax) ? window : parent;
+var MathJax = context.MathJax;
+
+var settings = {
+	
+document: {
+	URL: "",
+	compatMode: "",
+	documentMode: "",
+	charset: "",
+	inputEncoding: "",
+	lastModified: "",
+	height: 0,
+	width: 0	
+},
+navigator: {
+	appCodeName: "",
+	appName: "",
+	appVersion: "",
+	cookieEnabled: false,
+	language: "",
+	oscpu: "",
+	platform: "",
+	product: "",
+	productSub: "",
+	userAgent: "",
+	vendor: "",
+	vendorSub: ""
+},
+screenTop: 0,
+screenLeft: 0,
+innerHeight: 0,
+innerWidth: 0,
+outerHeight: 0,
+outerWidth: 0,
+screen: {
+	availTop: 0,
+	availLeft: 0,
+	availHeight: 0,
+	availWidth: 0,
+	height: 0,
+	width: 0,
+	colorDepth: 0,
+	pixelDepth: 0
+},
+MathJax: {
+	isReady: false,
+	version: "",
+	Ajax: {
+		rootPattern: "",
+		styleDelay: 0,
+		timeout: 0
+	},
+	Extension: {
+		tex2jax: {
+			version: "",
+			config: {
+				displayMath: [],
+				element: "",
+				ignoreClass: "",
+				inlineMath: [],
+				preview: "",
+				processClass: "",
+				processEnvironments: false,
+				processEscapes: false,
+				skipTags: []
+			},
+			ignoreClass: "",
+			pattern: "",
+			processClass: "",
+			skipTags: "",
+			start: ""
+		},
+		mml2jax: {
+			MMLnamespace: "",
+			version: "",
+			config: {
+				element: "",
+				preview: ""
+			}
+		},
+		jsMath2jax: {
+			
+		},
+		MathZoom: {
+			ffMMLcenterBug: false,
+			ffMMLwidthBug: false,
+			version: ""
+		},
+		MathMenu: {
+			
+		},
+		FontWarnings: {
+			
+		}
+	},
+	HTML: {
+		Cookie: {
+			expires: 0,
+			prefix: ""
+		}
+	},
+	Hub: {
+		processUpdateTime: 0,
+		Browser: {
+			name: "",
+			version: 0,
+			isChrome: false,
+			isFirefox: false,
+			isKonqueror: false,
+			isMSIE: false,
+			isMac: false,
+			isOpera: false,
+			isPC: false,
+			isSafari: false
+		},
+		config: {
+			delayStartupUntil: "",
+			displayAlign: "",
+			displayIndent: 0,
+			errorSettings: {}, // FIXME
+			extensions: [],
+			inputJax: {}, // FIXME
+			jax: [],
+			messageStyle: "",
+			outputJax: {}, // FIXME
+			postJax: "",
+			preJax: "",
+			preRemoveClass: "",
+			root: "",
+			showProcessingMessages: false,
+			skipStartupTypeset: false,
+			styleSheets: [],
+			styles: {}, // FIXME
+			MMLorHTML: {
+				prefer: {
+					Firefox: "",
+					MSIE: "",
+					Opera: "",
+					other: ""
+				}
+			},
+			MathML: {
+				useMathMLspacing: false
+			},
+			MathMenu: {
+				delay: 0,
+				helpURL: "",
+				showContext: false,
+				showFontMenu: false,
+				showRenderer: false
+			},
+			NativeMML: {
+				scale: 0,
+				showMathMenu: false,
+				showMathMenuMSIE: false
+			},
+			TeX: {
+				MultiLineWidth: "",
+				TagIndent: "",
+				TagSide: ""
+			},
+			"HTML-CSS": {
+				scale: 0
+			},
+			menuSettings: {
+				ALT: false,
+				CMD: false,
+				CTRL: false,
+				Shift: false,
+				context: "",
+				font: "",
+				format: "",
+				renderer: "",
+				zoom: "",
+				zscale: ""
+			}
+		}
+	},
+	ElementJax: {
+		directory: "",
+		extensionDir: "",
+		version: ""			
+	},
+	InputJax: {
+		directory: "",
+		extensionDir: "",
+		version: "",
+		MathML: {}, // FIXME
+		TeX: {}, // FIXME
+		jsMath: {} // FIXME
+	},
+	OutputJax: {
+		directory: "",
+		extensionDir: "",
+		fontDir: "",
+		version: "",
+		"HTML-CSS": {
+			AccentBug: false,
+			BIGDIMEN: 0,
+			// FONTDATA: {}, // FIXME
+			// Font: {}, // FIXME
+			LEFTBUTTON: 0,
+			NBSP: "",
+			PLANE1: "",
+			// TeX: {}, // FIXME
+			allowWebFonts: "",
+			autoLoadDir: "",
+			directory: "",
+			em: 0,
+			extensionDir: "",
+			ffVerticalAlignBug: false,
+			fontDir: "",
+			fontInUse: "",
+			id: "",
+			idPostfix: "",
+			msieMarginScale: 0,
+			outerEm: 0,
+			pxPerInch: 0,
+			require: [],
+			rfuzz: 0,
+			// settings: {}, // FIXME
+			version: "",
+			webFonts: false,
+			webFontDir: "",
+			config: {
+				availableFonts: [],
+				imageFont: "",
+				preferredFont: "",
+				preloadWebFonts: [],
+				scale: 0,
+				showMathMenu: false,
+				// styles: {}, // FIXME
+				useOldImageData: false,
+				webFont: ""
+			}
+		},
+		NativeMML: {
+			LEFTBUTTON: 0,
+			MENUKEY: "",
+			MMLnamespace: "",
+			directory: "",
+			extensionDir: "",
+			id: "",
+			msieQuirks: false,
+			noContextMenuBug: false,
+			require: "",
+			version: "",
+			NAMEDSPACE: {
+				negativemediummathspace: "",
+				negativethickmathspace: "",
+				negativethinmathspace: "",
+				negativeverythickmathspace: "",
+				negativeverythinmathspace: "",
+				negativeveryverythickmathspace: "",
+				negativeveryverythinmathspace: ""				
+			},
+			config: {
+				scale: 0,
+				showMathMenu: false,
+				showMathMenuMSIE: false
+			}
+		}
+	},
+	Menu: {
+		config: {
+			delay: 0,
+			helpURL: "",
+			showContext: false,
+			showFontMenu: false,
+			showRenderer: false
+		}
+	}
+}
+
+}
+
+
+var table = $("#advanced");
+var tBody = table.tBodies.item(0);
+var rows = tBody.rows;
+var template = rows.item(rows.length - 1);
+tBody.removeChild(template);
+template.className = "";
+
+var createPropertyDisplay = function(name, sample) {
+	var row = template.cloneNode(true);
+	tBody.appendChild(row);	
+	var nameCell = row.cells[0];
+	var typeCell = row.cells[1];
+	var valCell = row.cells[2];
+	var type, inp = "";
+	switch (typeof sample) {
+		case "object":
+			if (sample.length != null) {
+				type = "list";
+				inp = '<input type="text" readonly />';
+			}
+			else {
+				type = "object";
+				inp = '<input type="radio" readonly />';
+			}
+			break;
+		case "boolean":
+			type = "boolean";
+			inp = '<input type="checkbox" value="true" readonly /><input type="checkbox" value="false" readonly checked style="display: none;" />';
+			break;
+		case "number":
+			type = "number";
+			inp = '<input type="text" readonly />';
+			break;
+		case "string":
+			type = "string";
+			inp = '<input type="text" readonly />';
+			break;
+	}
+	nameCell.innerHTML = name;
+	typeCell.innerHTML = type;
+	valCell.innerHTML = inp;
+	var inpEl = valCell.firstChild, inpEl2 = inpEl.nextSibling;
+	inpEl.name = name;
+	if (inpEl2) inpEl2.name = name;
+	return inpEl;
+}
+
+var showObject = function(object, path) {
+	Object.each(object, function(name, val) {
+		var fullName = (path) ? path + "." + name : name;
+		var prop = context;
+		Array.forEach (fullName.split("."), function(field) {
+			if (prop) prop = prop[field];
+		});
+		
+		var inpEl = createPropertyDisplay(fullName, val);
+		if (prop == null) {
+			inpEl.disabled = true;
+			inpEl.title = "NOT PRESENT";
+		}
+		switch (typeof val) {
+			case "object":
+				if (val.length != null && prop) inpEl.value = prop.join(",");
+				else {
+					inpEl.disabled = true;
+					if (prop) inpEl.checked = true;
+					showObject(val, fullName);
+				}
+				break;
+			case "boolean":
+				if (prop) {
+					inpEl.checked = true;
+					inpEl.nextSibling.checked = false;
+				}
+				break;
+			case "number":
+				if (prop) inpEl.value = prop;
+				break;
+			case "string":
+				if (prop) inpEl.value = prop;
+				break;
+		}
+	});
+}
+
+MathJax.Hub.queue.Push(function() { showObject(settings); });
+
+var checks = [
+{
+name: "Startup",
+title: "MathJax Startup",
+checks: [
+	{
+	name: "Script",
+	title: "MathJax loaded successfully",
+	test: function() { return !!MathJax; }
+	},
+	{
+	name: "Init",
+	title: "MathJax initialization completed",
+	test: function() { return MathJax.Hub.Startup.signal.posted.indexOf("End Extensions") >= 0; }
+	}
+]
+},
+{
+name: "Equations",
+title: "Equations",
+checks: [
+	{
+	name: "Found",
+	title: "Equations were found",
+	test: function() { return MathJax.Hub.getAllJax().length > 0; }
+	},
+	{
+	name: "TeX",
+	title: "TeX Preprocessing enabled",
+	test: function() { return !!MathJax.Extension.tex2jax; }
+	},
+	{
+	name: "MathML",
+	title: "MathML Preprocessing enabled",
+	test: function() { return !!MathJax.Extension.mml2jax; }
+	}
+]
+},
+{
+name: "General",
+title: "General Recommendations",
+checks: [
+	{
+	name: "Quirksmode",
+	title: "Quirks Mode",
+	test: function() { return (!context.document.compatMode || context.document.compatMode == "BackCompat"); }
+	},
+	{
+	name: "EmulateIE7",
+	title: "Emulate IE7 meta tag",
+	test: function() {
+		var elts = $$("meta", context.document);
+		var meta;
+		for (var n=elts.length, i=0; i<n; i++) {
+			meta = elts[i];
+			if (meta.httpEquiv === "X-UA-Compatible") break;
+			meta = null;
+		}
+		if (!meta) return false;
+		if (!/^IE=EmulateIE7$/.test(meta.content)) return false;
+		for (var node=meta; node; node=node.previousSibling) {
+			if (node.nodeType !== 1) continue;
+			var nodeName = node.nodeName.toLowerCase();
+			if (nodeName !== "title" && nodeName !== "meta") return false;
+		}
+		return true;
+	}
+	}
+]
+}
+];
+
+var runChecks = function() {
+	var table = $("#basic");
+	var tBodyTemplate = table.tBodies.item(0);
+	table.removeChild(tBodyTemplate);
+	tBodyTemplate.className = "";
+	Array.forEach(checks, function(checkGroup) {
+		var tBody = tBodyTemplate.cloneNode(true);
+		table.appendChild(tBody);
+		var rows = tBody.rows;
+		var titleRow = rows.item(0);
+		var template = rows.item(1);
+		tBody.removeChild(template);
+		titleRow.cells[0].innerHTML = checkGroup.title;
+		
+		Array.forEach(checkGroup.checks, function(check) {
+			var row = template.cloneNode(true), titleCell = row.cells[0], resultCell = row.cells[1];
+			titleCell.innerHTML = check.title;
+			resultCell.innerHTML = '<input type="checkbox" name="check" readonly />';
+			var input = resultCell.firstChild;
+			input.value = check.name;
+			input.checked = check.test();
+			tBody.appendChild(row);			
+		})
+	});
+}
+
+MathJax.Hub.queue.Push(runChecks);
+</script>
+</html>

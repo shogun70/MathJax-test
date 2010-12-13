@@ -1,0 +1,68 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+<head>
+<title>MathJax Issue #24 demo</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta content="IE=EmulateIE7" http-equiv="X-UA-Compatible">
+<script src="ui.js"></script>
+<script src="config.js"></script>
+<script>
+var mui = MathJaxUI, $ = mui.$, $$ = mui.$$,
+	extend = Object.extend, each = Object.each, forEach = Array.forEach, eachWord = String.eachWord;
+
+// Default config
+Object.extend(config, {
+});
+
+// Utilities
+mui.getOptions(function(key, val) {
+	val = decodeURIComponent(val);
+	config[key] = val;
+});
+
+</script>
+</head>
+<body>
+<h1>MathJax Issue #24 demo</h1>
+<form name="config">
+<label>Script location <input type="text" size="40" name="script" /></label>
+<input type="submit" name="run" value="Run" />
+</form>
+<script>
+(function() {
+
+var form = document.forms["config"];
+Array.forEach("script".split(/\s+/), function(name) {
+	form[name].value = config[name];
+});
+
+})();
+</script>
+
+<hr />
+<div style="font-size: 15px; max-width: 630px; border: 2px solid red;">
+<p><strong>THEOREM 28.</strong> $\;$ Let $\rm\; M\;$ be a maximal ideal in $\rm\; R[x]\;$ and suppose that 
+the contraction $\rm\; M \cap R = N\;$ is maximal in $\rm\; R\;$, Then $\rm\; M\;$ can be generated 
+by $\rm\; N\;$ and one more element $\rm\; f\;$. We can select $\rm\; f\;$ to be a monic polynomial 
+which maps mod $\rm\; N\;$ into an irreducible polynomial over the field $\rm\; R/N\;$. </p>
+</div>
+
+</body>
+<script id="__MathJax__" type="text/plain">
+    MathJax.Hub.Config({
+        jax: ["input/TeX", "output/HTML-CSS"],
+		extensions: ["tex2jax.js"],
+//		skipStartupTypeset: true,
+//		displayAlign: "center",
+		tex2jax: {
+			inlineMath: [["$","$"]],
+			displayMath: [["$$","$$"]]
+		},
+		"HTML-CSS": { showMathMenu: false, scale: 100 }
+    });
+</script>
+<script>
+if (config.run) document.write('<script src="', config.script, '" type="text/javascript">\n', $("#__MathJax__").innerHTML, '<', '/script>');
+</script>
+
+</html>

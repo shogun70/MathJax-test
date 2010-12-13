@@ -1,0 +1,452 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+<head>
+<title>MathJax Performance Utility</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta content="IE=EmulateIE7" http-equiv="X-UA-Compatible" />
+<style>
+body {
+	background-color: #fff;
+}
+h1 {
+	font-size: 20pt;
+}
+label {
+	background-color: #eee;
+	border: 1px solid #aaa;
+	display: inline-block;
+	margin: 0.2em; margin-left: 0;
+	padding: 0.2em;
+	border-radius: 4px;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+}
+ul.tabs {
+	list-style-position: inside;
+	list-style-type: none;
+	padding-left: 0px;
+	margin: 0px;
+	line-height: 1.4em;
+}
+ul.tabs li {
+	display: inline;
+	background-color: #eee;
+	border: 1px solid #aaa;
+	padding: 0.2em;
+	border-radius: 4px 4px 0 0;
+	-moz-border-radius: 4px 4px 0 0;
+	-webkit-border-radius: 4px 4px 0 0;
+}
+iframe {
+	width: 100%;
+	height: 100%;
+	border: 1px solid #aaa;
+}
+table {
+	table-layout: auto;
+	width: 100%;
+	border-collapse: collapse;
+	border: 1px solid #aaa;
+	margin: 0.2em; margin-left: 0;
+}
+caption {
+	width: auto;
+	background-color: #ccc;
+	border: 2px solid #aaa;
+	padding: 0.2em;
+	border-radius: 4px 4px 0 0;
+	-moz-border-radius: 4px 4px 0 0;
+	-webkit-border-radius: 4px 4px 0 0;
+}
+thead th {
+	padding: 0;
+	width: auto;
+}
+thead th button {
+	display: block;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	border-width: 1px;
+	background-color: #eee;
+}
+tr {
+	border-top: 1px solid #eee;
+	white-space: nowrap;
+	overflow: visible;
+}
+td {
+	overflow: hidden;
+	white-space: nowrap;
+}
+.template {
+	display: none;
+}
+table input {
+	border: none;
+	background-color: transparent;
+}
+input.type {
+	text-align: center;
+	width: 1em;
+	height: 1em;
+	background-color: #aaa;
+	color: white;
+	font-weight: bold;
+}
+input.start {
+	text-align: right;
+}
+input.duration {
+	background-color: blue;
+	color: white;
+	text-align: center;
+}
+input.Action { background-color: green; }
+input.Script, input.Process { background-color: blue; }
+input.Font, input.Reprocess { background-color: orange; }
+input.stop {
+	text-align: left;
+	width: 9%;
+}
+td.small { margin: 0; padding: 2px; line-height: 0.5em; }
+td.small input { font-size: 0.5em; margin: 0; }
+.hidden {
+	position: absolute;
+	position: fixed;
+	top: 0px;
+	left: 0px;
+	height: 0px;
+	width: 100%;
+	overflow: hidden;
+}
+</style>
+<script src="ui.js"></script>
+<script src="config.js"></script>
+<script>
+var mui = MathJaxUI, $ = mui.$, $$ = mui.$$,
+	extend = Object.extend, each = Object.each, forEach = Array.forEach, eachWord = String.eachWord;
+
+// Default config
+Object.extend(config, {
+	url: '../test/sample.html'
+});
+
+mui.getOptions(function(key, val) {
+	val = decodeURIComponent(val);
+	config[key] = val;
+});
+
+</script>
+</head>
+<body>
+<h1>MathJax Performance Utility</h1>
+
+<form name="config">
+
+<label>Test URL <input type="text" size="40" name="url" /></label>
+
+<input type="submit" name="run" value="Run" />
+</form>
+
+<script>
+(function() {
+
+var form = document.forms["config"];
+form["url"].value = config.url;
+
+})();
+</script>
+
+<hr />
+	
+<ul id="tabs" class="tabs">
+	<li><a href="#testBox">Test</a></li>
+	<li><a href="#tasksBox">Task Timelines</a></li>
+	<li><a href="#mathBox">Math Stats</a></li>
+</ul>
+
+<div id="runbox">
+	
+<div id="testBox">
+<iframe id="test"></iframe>
+</div>
+
+<div id="tasksBox">
+<table id="tasks">
+	<col class="label" />
+	<col class="data" style="width: 100%;" />
+	<thead>
+		<tr>
+			<th><button type="button">Task</button></th>
+			<th><button type="button">Timeline (ms)</button></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr class="template">
+			<td class="label">
+				<input readonly class="type" name="type" />
+				<input readonly class="task" name="task" />
+			</td>
+			<td class="data">
+				<input readonly class="start" name="start" />
+				<input readonly class="duration" name="duration" />
+				<input readonly class="stop" name="stop" />
+			</td>
+		</tr>
+	</tbody> 
+</table>
+</div>
+
+<div id="mathBox">
+<table id="math">
+	<col class="label" />
+	<col class="data" style="width: 50%;"/>
+	<col class="data" style="width: 50%;"/>
+	<thead>
+		<tr>
+			<th><button type="button">Math</button></th>
+			<th><button type="button">Process (ms)</button></th>
+			<th><button type="button">Reprocess (ms)</button></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr class="template">
+			<td class="small label">
+				<input readonly class="task" name="name" />
+			</td>
+			<td class="small data"><input readonly class="duration" name="process" /></td>
+			<td class="small data"><input readonly class="duration" name="reprocess" /></td>
+		</tr>
+	</tbody> 
+</table>
+</div>
+
+</div>
+
+<script>
+(function() {
+
+var runBox = $("#runbox");
+var height = (window.innerHeight || document.documentElement.offsetHeight) - runBox.offsetTop - document.body.offsetTop;
+$("#test").style.height = height * 0.95 + "px";
+var onclick = function(e) {
+	var href = this.href;
+	var m = href.split("#");
+	if (m[0] !== document.URL) return;
+	var panel = $("#" + m[1]);
+	var box = panel.parentNode;
+	Array.forEach(box.childNodes, function(node) {
+		if (node.nodeType !== 1) return;
+		node.className = "hidden";
+	});
+	panel.className = "";
+	
+	var li = this.parentNode;
+	var ul = li.parentNode;
+	Array.forEach(ul.childNodes, function(node) {
+		if (node.nodeType !== 1) return;
+		node.className = "";
+	});
+	li.className = "selected";
+	
+	return false;
+}
+
+Array.forEach($$("a", $("#tabs")), function(link, i) { link.onclick = onclick; if (i === 0) link.onclick(); });
+
+})();
+</script>
+
+</body>
+<script>
+var beginTime, endTime;
+window.Init = function(MathJax) {
+
+endTime = Date.now();
+var root = MathJax.Hub.config.root;
+var script = "MathJax.js";
+var performance = {};
+
+performance[script] = {
+	type: "Script",
+	name: script,
+	url: root + "/" + script,
+	begin: beginTime,
+	end: Date.now()
+};
+
+var actionNames = "Config Cookie Styles Jax Extensions PreProcess Process Reprocess".split(/\s+/);
+var signalHandler = function(message) {
+	var now = endTime = Date.now();
+	var m = message.toString().split(/\s+|\s*,\s*/);
+	var task = m[1], ph = m[0];
+	if (actionNames.indexOf(task) >= 0) {
+		if (ph == "Begin") performance[task] = { type: "Action", name: task, begin: now }
+		if (ph == "End") performance[task].end = now;
+	}
+	if (task == "Load") {
+		var url = message.url;
+		var name = url.replace(root + "/", "");
+		if (ph == "Begin") performance[name] = { type: "Script", name: name, url: url, begin: now };
+		if (ph == "End") performance[name].end = now;
+	}
+	if (task == "Font") {
+		var name = message.fontName;
+		if (ph == "Begin") performance[name] = { type: "Font", name: name, url: url, begin: now };
+		if (ph == "End") performance[name].end = now;			
+	}
+}
+
+
+// intercept Font loading
+MathJax.Hub.Register.StartupHook("HTML-CSS Jax Ready", function() {
+	var FONT = MathJax.OutputJax["HTML-CSS"].Font;
+	FONT._loadComplete = FONT.loadComplete;
+	FONT.loadComplete = function(font, n, done, status) {
+		MathJax.Hub.Startup.signal.Post({ name: "End Font", fontName: font.directory, toString: function() { return this.name; } });
+		return this._loadComplete(font, n, done, status);
+	}
+	FONT._loadWebFont = FONT.loadWebFont;
+	FONT.loadWebFont = function(font) {
+		MathJax.Hub.Startup.signal.Post({ name: "Begin Font", fontName: font.directory, toString: function() { return this.name; } });
+		return this._loadWebFont(font);
+	}
+});
+
+// intercept Ajax.Load
+MathJax.Ajax._Load = MathJax.Ajax.Load;
+MathJax.Ajax.Load = function(file, callback) {
+	var url = file.JS;
+	var callback = MathJax.Callback(callback);
+	var hook = callback.hook;
+	callback.hook = function() {
+		if (url) MathJax.Hub.Startup.signal.Post({ name: "End Load", url: url, toString: function() { return this.name; } });
+		return hook.apply(this, arguments);
+	}
+	if (url) MathJax.Hub.Startup.signal.Post({ name: "Begin Load", url: url, toString: function() { return this.name; } });
+	return this._Load(file, callback);
+}
+
+
+MathJax.Hub.Startup.signal.Interest(signalHandler);
+MathJax.Hub.signal.Interest(signalHandler);
+
+var taskUI = {}
+taskUI.table = $("#tasks");
+taskUI.tBody = taskUI.table.tBodies[0];
+taskUI.template = taskUI.tBody.rows[0];
+taskUI.tBody.removeChild(taskUI.template);
+taskUI.template.className = "";
+taskUI.addRow = function(name, type, title, begin, end) {
+	var start = begin - beginTime, stop = end - beginTime, duration = end - begin;
+	var totalTime = endTime - beginTime;
+	var row = this.template.cloneNode(true);
+	this.tBody.appendChild(row);
+	var inputs = $$("input", row);
+	var taskType = inputs[0];
+	taskType.value = type.charAt(0).toUpperCase();
+	taskType.title = type;
+	taskType.className += " " + type;
+	var taskName = inputs[1];
+	taskName.value = name;
+	taskName.title = name;
+	if (title) taskName.title = title;
+	var data = [ start, duration, stop ]; 
+	var timeline = "start: " + start + " / duration: " + duration + " / stop: " + stop;
+	var scale = 90 / totalTime;
+	Array.forEach(data, function(val, i) {
+		var input = inputs[i+2];
+		input.value = val;
+		if (i < 2) input.style.width = val * scale + "%";
+		if (i == 1) input.className += " " + type;
+		input.title = timeline;
+	});
+}
+
+var math = {
+	count: 0,
+	lastTime: 0,
+	maxDuration: 0,
+	samples: []
+}
+var reprocessing = 0;
+
+MathJax.Hub.Register.MessageHook("Begin Reprocess", function() { reprocessing = 1; math.count = 0;})
+MathJax.Hub.Register.MessageHook("New Math", function(message) {
+	var now = Date.now();
+	var duration = (math.lastTime) ? now - math.lastTime : 0;
+	math.lastTime = now;
+	if (duration > math.maxDuration) math.maxDuration = duration;
+	var data = math.samples[math.count];
+	if (!data) data = math.samples[math.count] = {};
+	math.count++;
+	data.name = message[1];
+	if (reprocessing) data.reprocess = duration;
+	else data.process = duration;
+});
+
+var mathUI = {}
+mathUI.table = $("#math");
+mathUI.tBody = mathUI.table.tBodies[0];
+mathUI.template = mathUI.tBody.rows[0];
+mathUI.tBody.removeChild(mathUI.template);
+mathUI.template.className = "";
+
+mathUI.addRow = function(name, process, reprocess) {
+	var row = this.template.cloneNode(true);
+	this.tBody.appendChild(row);
+	var inputs = $$("input", row);
+	var input = inputs[0], val;
+	input.value = name;
+	input.title = name;
+	var scale = 95 / math.maxDuration;
+	input = inputs[1];
+	val = process;
+	input.value = val;
+	input.style.width = val * scale + "%";
+	input.className += " Process";
+	input = inputs[2];
+	val = reprocess;
+	input.value = val;
+	input.style.width = val * scale + "%";
+	input.className += " Reprocess";
+}
+
+// NOTE Firefox doesn't complete these actions when called as MathJax.Hub.queue.Push(function() { MathJax.Hub.Reprocess(); })
+// TODO Why not??
+// MathJax.Hub.queue.Push("MathJax.Hub.PreProcess();");
+// MathJax.Hub.queue.Push("MathJax.Hub.Process();");
+MathJax.Hub.queue.Push("MathJax.Hub.Reprocess();");
+
+MathJax.Hub.queue.Push(function() {
+	Object.each(performance, function(taskName, t) {
+		taskUI.addRow(taskName, t.type, null, t.begin, t.end);
+	});
+});
+
+MathJax.Hub.queue.Push(function() {
+	Array.forEach(math.samples, function(t) {
+		mathUI.addRow(t.name, t.process, t.reprocess);
+	});
+});
+
+}
+</script>
+<script>
+if (config.run) (function() {
+
+beginTime = Date.now();
+var test = $("#test"), context = test.contentWindow;
+test.src = config.url;
+
+var poll = window.setInterval(function() {
+	if (context.MathJax) {
+		window.clearInterval(poll);
+		window.Init(context.MathJax);
+	}
+}, 25)
+
+})();
+</script>
+</html>

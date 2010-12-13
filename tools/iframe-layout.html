@@ -1,0 +1,432 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+<head>
+<title>MathJax Iframe Delegation</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta content="IE=EmulateIE7" http-equiv="X-UA-Compatible">
+<style>
+body {
+	background-color: #fff;
+}
+h1 {
+	font-size: 20pt;
+}
+label {
+	background-color: #ccc;
+	border: 2px solid #aaa;
+	display: inline-block;
+	margin: 0.2em; margin-left: 0;
+	padding: 0.2em;
+	border-radius: 4px;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+}
+table {
+	border-collapse: collapse;
+	border: 1px solid #aaa;
+	table-layout: auto;
+	margin: 0.2em; margin-left: 0;
+}
+caption {
+	width: auto;
+	background-color: #ccc;
+	border: 2px solid #aaa;
+	padding: 0.2em;
+	border-radius: 4px 4px 0 0;
+	-moz-border-radius: 4px 4px 0 0;
+	-webkit-border-radius: 4px 4px 0 0;
+}
+th, td {
+	border: 1px solid #aaa;
+	padding: 0.2em;
+}
+
+.hidden {
+	display: none; 
+}
+</style>
+<script src="ui.js"></script>
+<script src="config.js"></script>
+<script>
+/*
+ Basic Procedure
+*/
+
+var mui = MathJaxUI, $ = mui.$, $$ = mui.$$,
+	extend = Object.extend, each = Object.each, forEach = Array.forEach, eachWord = String.eachWord;
+
+// Default config
+Object.extend(config, {
+	script: '../MathJax.js',
+	static: false,
+	inlineBlock: false,
+	count: 1
+});
+
+// Utilities
+if (!Array.forEach) Array.forEach = function(list, callback, context) {
+	for (var n=list.length, i=0; i<n; i++) callback.call(context, list[i], i, list);
+}
+var forEach = Array.forEach;
+
+var getOptions = function(callback, context) {
+	if (!context) context = this;
+	var optString = location.toString().split("?")[1];
+	if (!optString) return;
+	var optList = optString.split("&");
+	var options = {};
+	forEach(optList, function(text) {
+		var m = text.split("=");
+		callback.call(context, m[0], m[1]);
+	});
+}
+
+getOptions(function(key, val) {
+	val = decodeURIComponent(val);
+	config[key] = val;
+});
+
+</script>
+<script>
+if (config.static || config.inlineBlock) {
+
+document.write(
+'<style>',
+'.MathJax nobr span {',
+(config.inlineBlock ? 'display: inline-block;' : ''),
+(config.static ? 'position: static;' : ''),
+'}',
+'</style>'
+);
+	
+}
+</script>
+
+</head>
+<body>
+<h1>MathJax Iframe Delegation</h1>
+<form name="config">
+<label>Script location <input type="text" size="40" name="script" /></label>
+<label>Equation
+<select name="equation">
+	<option value="">Select All</option>
+	<option value="lorenz">The Lorenz Equations</option>
+	<option value="cauchy-schwarz">The Cauchy-Schwarz Inequality</option>
+	<option value="cross-product">A Cross Product Formula</option>
+	<option value="probability">The probability of getting k heads when flipping n coins is</option>
+	<option value="ramanujan">An Identity of Ramanujan</option>
+	<option value="rogers-ramanujan">A Rogers-Ramanujan Identity</option>
+	<option value="maxwell">Maxwell's Equations</option>
+</select>
+</label>
+
+<script id="lorenz" type="math/tex; mode=display">
+\begin{aligned}
+\dot{x} & = \sigma(y-x) \\
+\dot{y} & = \rho x - y - xz \\
+\dot{z} & = -\beta z + xy
+\end{aligned}
+</script>
+
+<script id="cauchy-schwarz" type="math/tex; mode=display">
+\left( \sum_{k=1}^n a_k b_k \right)^2 \leq \left( \sum_{k=1}^n a_k^2 \right) \left( \sum_{k=1}^n b_k^2 \right)
+</script>
+
+<script id="cross-product" type="math/tex; mode=display">
+\mathbf{V}_1 \times \mathbf{V}_2 =  \begin{vmatrix}
+\mathbf{i} & \mathbf{j} & \mathbf{k} \\
+\frac{\partial X}{\partial u} &  \frac{\partial Y}{\partial u} & 0 \\
+\frac{\partial X}{\partial v} &  \frac{\partial Y}{\partial v} & 0
+\end{vmatrix}
+</script>
+
+<script id="probability" type="math/tex; mode=display">
+P(E)   = {n \choose k} p^k (1-p)^{ n-k}
+</script>
+
+<script id="ramanujan" type="math/tex; mode=display">
+\frac{1}{\Bigl(\sqrt{\phi \sqrt{5}}-\phi\Bigr) e^{\frac25 \pi}} =
+1+\frac{e^{-2\pi}} {1+\frac{e^{-4\pi}} {1+\frac{e^{-6\pi}}
+{1+\frac{e^{-8\pi}} {1+\ldots} } } }
+</script>
+
+<script id="rogers-ramanujan" type="math/tex; mode=display">
+1 +  \frac{q^2}{(1-q)}+\frac{q^6}{(1-q)(1-q^2)}+\cdots =
+\prod_{j=0}^{\infty}\frac{1}{(1-q^{5j+2})(1-q^{5j+3})},
+\quad\quad \text{for} |q|<1.
+</script>
+
+<script id="maxwell" type="math/tex; mode=display">
+\begin{aligned}
+\nabla \times \vec{\mathbf{B}} -\, \frac1c\, \frac{\partial\vec{\mathbf{E}}}{\partial t} & = \frac{4\pi}{c}\vec{\mathbf{j}} \\   \nabla \cdot \vec{\mathbf{E}} & = 4 \pi \rho \\
+\nabla \times \vec{\mathbf{E}}\, +\, \frac1c\, \frac{\partial\vec{\mathbf{B}}}{\partial t} & = \vec{\mathbf{0}} \\
+\nabla \cdot \vec{\mathbf{B}} & = 0 \end{aligned}
+</script>
+
+<label title="How many equations to place in test page">Count <input type="text" size="4" name="count" /></label>
+<label class="hidden" title="The default setting for 'position' style of spans is 'static'. IE only.">Static<input type="checkbox" name="static" /></label>
+<label title="The default setting for 'display' style of spans is 'inline-block'.">Inline-Block <input type="checkbox" name="inlineBlock" /></label>
+<input type="submit" name="run" value="Run" />
+<label>documentMode <input type="text" name="documentMode" disabled /></label>
+<label>compatMode <input type="text" name="compatMode" disabled /></label>
+</form>
+<script>
+(function() {
+
+var form = document.forms["config"];
+Array.forEach("script count".split(/\s+/), function(name) {
+	form[name].value = config[name];
+});
+Array.forEach(form["equation"].options, function(option) {
+	if (option.value === config.equation) option.selected = true;
+});
+Array.forEach("static inlineBlock".split(/\s+/), function(name) {
+	form[name].checked = !!config[name];
+});
+Array.forEach("documentMode compatMode".split(/\s+/), function(name) {
+	form[name].setAttribute("value", document[name]);
+});
+})();
+</script>
+
+
+<table id="table">
+	<caption>Equation Processing Stats</caption>
+	<thead>
+		<tr>
+			<th>Eqn #</th>
+			<th title="The MathJax Process call">Process (ms)</th>
+			<th title="Copying math source to iframe">Export (ms)</th>
+			<th title="Process in the iframe">Adjust (ms)</th>
+			<th title="Copying math DOM from iframe">Import (ms)</th>
+			<th title="Export + Adjust + Import">Rebuild (ms)</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr class="template"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+	</tbody>
+</table>
+<hr />
+
+<div id="runbox">
+<script>
+(function() {
+
+var form = document.forms["config"], select = form["equation"];
+var math = "", all = select.options[0].selected;
+Array.forEach(select.options, function(option) {
+	var equation = option.value;
+	if (!equation) return;
+	if (!all && !option.selected) return;
+	var script = $("#" + equation);
+	math += '<div><script type="math/tex; mode=display">' + script.innerHTML + '<\/script></div>\n';
+});
+for (var i=0; i<config.count; i++) document.write(math);
+
+})();
+</script>
+</div>
+
+</body>
+<script id="__MathJax__" type="text/plain">
+    MathJax.Hub.Config({
+		skipStartupTypeset: true,
+        jax: ["input/TeX", "output/HTML-CSS"],
+		"HTML-CSS": { showMathMenu: false, scale: 100 },
+		extensions: ["tex2jax.js"],
+		tex2jax: { displayMath: [["$$","$$"]] }
+    });
+</script>
+<script>
+var mathjaxConfig = $("#__MathJax__").innerHTML;
+document.write('<script src="', config.script, '" type="text/javascript">\n', mathjaxConfig, '\n<\/script>\n');
+</script>
+
+<script>
+var iframe = document.createElement("iframe");
+iframe.style.cssText = "position: fixed; top: -1000px; left: 0px; width: 100%; height: 500px;"
+document.body.appendChild(iframe);
+//document.getElementsByTagName("head")[0].appendChild(iframe);
+(function() {
+	
+var doc = iframe.contentWindow.document;
+var buf = [];
+if (document.compatMode != "BackCompat") buf.push('<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">\n');
+buf.push('<html><head>\n');
+if (document.documentMode == 7) buf.push('<meta content="IE=EmulateIE7" http-equiv="X-UA-Compatible" />\n');
+
+buf.push('<style>.MathJax nobr span {',
+(config.inlineBlock ? 'display: inline-block;' : ''),
+(config.static ? 'position: static;' : ''),
+'}</style>\n');
+
+buf.push('<script src="', config.script, '" type="text/javascript">\n', mathjaxConfig, '\n<\/script>');
+buf.push('</head><body>\n');
+buf.push('</body></html>\n');
+
+doc.open();
+doc.write(buf.join(""));
+doc.close();
+
+})();
+
+var Equation = function(script) {
+	this.script = script;
+}
+
+// NOTE might use these to copy styles from the equation to the iframe
+Equation.defaultStyle = {
+	"text-align": "left",
+//	"vertical-align": "inherit",
+	display: "inline",
+	position: "static",
+	float: "none",
+	width: "auto",
+	height: "auto",
+	top: 0,
+	bottom: "auto",
+	left: 0,
+	right: "auto",
+	"line-height": "normal",
+	"font-size": "auto",
+	"margin-left": 0,
+	"margin-right": 0,
+	"margin-top": 0,
+	"margin-bottom": 0,
+	"padding-left": 0,
+	"padding-right": 0,
+	"padding-top": 0,
+	"padding-bottom": 0,
+	"border-left-width": 0,
+	"border-right-width": 0,
+	"border-top-width": 0,
+	"border-bottom-width": 0
+}
+
+Equation.camelCaseNames = {};
+(function() {
+	var defStyle = Equation.defaultStyle;
+	for (var name in defStyle) {
+		var camelCaseName = "";
+		Array.forEach(name.split("-"), function(part, i) { camelCaseName += (i == 0) ? part : part.charAt(0).toUpperCase() + part.slice(1); });
+		Equation.camelCaseNames[name] = camelCaseName;
+	}
+	
+})();
+
+Equation.prototype = {
+
+Process: function() {
+	var callback = MathJax.Hub.Process(this.script);
+	return callback;
+},
+
+Export: function() {
+	var script = this.script, parent = script.parentNode;
+	this.display = script.previousSibling;
+	var doc = iframe.contentWindow.document;
+	var remoteScript = this.remoteScript = doc.createElement("script");
+	remoteScript.type = script.type;
+	var scriptText = script.innerHTML;
+	remoteScript.text = scriptText;
+	if (!remoteScript.innerHTML) remoteScript.appendChild(doc.createTextNode(scriptText));
+	var fontSize = "100%";
+	if (window.getComputedStyle) fontSize = window.getComputedStyle(parent, null).fontSize;
+	else if (parent.currentStyle) fontSize = parent.currentStyle.fontSize;
+	doc.body.fontSize = fontSize;
+	doc.body.appendChild(this.remoteScript);
+},
+
+Adjust: function() {
+	var mj = iframe.contentWindow.MathJax;
+	var callback = MathJax.Callback(function() {});
+	mj.Hub.Reprocess(callback);
+	return callback;
+},
+
+Import: function() {
+	var doc = iframe.contentWindow.document;
+	var remoteDisplay = this.remoteScript.previousSibling;
+	var frag = document.importNode ? document.importNode(remoteDisplay.firstChild, true) :
+			remoteDisplay.firstChild.cloneNode(true);
+	frag.style.border = "1px dashed red";
+	this.display.replaceChild(frag, this.display.firstChild);
+	doc.body.removeChild(remoteDisplay);
+	doc.body.removeChild(this.remoteScript);
+	this.height = this.display.offsetHeight;
+	this.width = this.display.offsetWidth;
+	delete this.remoteScript;
+	delete this.display;
+}
+
+}
+
+
+var timeStamps = [];
+var eqnList = [];
+var tBody = $("#table").tBodies[0];
+
+var Init = function() {
+
+var total = {
+	size : 0,
+	height : 0,
+	reprocess: 0,
+	copyout: 0,
+	adjust: 0,
+	copyin: 0
+}
+
+var mathScripts = [];
+forEach($$("script", $("#runbox")), function(script) { if (script.type == "math/tex; mode=display") mathScripts.push(script); });
+forEach(mathScripts, function(script, eqnIndex) {
+	var t = timeStamps;
+	var eqn = new Equation(script);
+	eqnList.push(eqn);		
+	MathJax.Hub.queue.Push(
+		function() { t[0] = +(new Date); },
+		["Process", eqn],
+		function() { t[1] = +(new Date); },
+		["Export", eqn],
+		function() { t[2] = +(new Date); },
+		["Adjust", eqn],
+		function() { t[3] = +(new Date); },
+		["Import", eqn],
+		function() {
+			t[4] = +(new Date);
+			var template = tBody.rows[tBody.rows.length - 1];
+			var row = template.cloneNode(true);
+			tBody.insertBefore(row, template);
+			row.className = "";
+			var procTime = t[1] - t[0], copyoutTime =  t[2] - t[1], adjustTime = t[3] - t[2], copyinTime = t[4] - t[3];
+			var data = [ (eqnIndex + 1), procTime, copyoutTime, adjustTime, copyinTime, (copyoutTime + adjustTime + copyinTime) ];
+			forEach(row.cells, function(cell, i) {
+				cell.innerHTML = data[i];
+			});
+			total.size += eqn.size;
+			total.height += eqn.height;
+			total.reprocess += procTime;
+			total.copyout += copyoutTime;
+			total.adjust += adjustTime;
+			total.copyin += copyinTime;
+		},
+		["Delay", MathJax.Callback, 1]
+	);
+});
+
+MathJax.Hub.queue.Push(function() {
+			var row = tBody.rows[tBody.rows.length - 1];
+			row.className = "";
+			var data = [ "Totals", total.reprocess, total.copyout, total.adjust, total.copyin, (total.copyout + total.adjust + total.copyin) ];
+			forEach(row.cells, function(cell, i) {
+				cell.innerHTML = data[i];
+			});	
+})
+
+
+}
+
+if (config.run) MathJax.Hub.queue.Push(Init);
+
+</script>
+</html>

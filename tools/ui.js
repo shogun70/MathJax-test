@@ -155,10 +155,13 @@ item: function(index) { return this.items()[index]; },
 contains: function(token) { return this.items().indexOf(token) >= 0; },
 add: function(token) { // FIXME doesn't maintain spacing
 	if (this.contains(token)) return;
-	this.__set__(this.items().push(token).join(" "));
+	var items = this.items();
+	items.push(token);
+	this.__set__(items.join(" "));
 },
 remove: function(token) { // FIXME doesn't maintain spacing
-	this.__set__(this.items().filter(function(item) { return item !== token; }).join(" "));
+	var items = this.items().filter(function(item) { return item !== token; });
+	this.__set__(items.join(" "));
 }, 
 toggle: function(token) {
 	if (this.contains(token)) this.remove(token);
@@ -198,6 +201,7 @@ updateInput: function(input, data) {
 	if (typeof data !== "object") return this.updateInputValue(input, data);
 	this.updateInputValue(input, data.value);
 	if (data.title) input.title = data.title;
+	if (data["class"]) ClassList(input).add(data["class"]);
 },
 updateInputValue: function(input, val) {
 	switch (typeof val) {

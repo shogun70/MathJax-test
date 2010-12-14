@@ -88,7 +88,7 @@ table input {
 	border: none;
 	background-color: transparent;
 }
-input.type {
+input[name=type] {
 	text-align: center;
 	width: 1em;
 	height: 1em;
@@ -96,25 +96,23 @@ input.type {
 	color: white;
 	font-weight: bold;
 }
-input.start {
+input[name=start] {
 	text-align: right;
 }
-input.duration {
-	background-color: blue;
-	color: white;
-	text-align: center;
-}
-input.Action { background-color: green; }
-input.Script, input.Process { background-color: blue; }
-input.Font, input.Reprocess { background-color: orange; }
-input.stop {
+input[name=stop] {
 	text-align: left;
 	width: 9%;
 }
+input[name=duration] {
+	text-align: center;
+}
+input.Action { background-color: green; color: white; }
+input.Script, input.Process { background-color: blue; color: white; }
+input.Font, input.Reprocess { background-color: orange; color: white; }
 td.small { margin: 0; padding: 2px; line-height: 0.5em; }
 td.small input { font-size: 0.5em; margin: 0; }
 
-.hidden { display: none; }
+.hidden { position: absolute; position: fixed; top: 0px; left: 0px; width: 100%; height: 0px; overflow: hidden; visibility: hidden; }
 </style>
 <script src="ui.js"></script>
 <script src="config.js"></script>
@@ -269,12 +267,12 @@ Array.forEach(form["doctype"].options, function(option) {
 		<tr class="template">
 			<td class="label">
 				<input readonly class="type" name="type" />
-				<input readonly class="task" name="task" />
+				<input readonly class="task" name="name" />
 			</td>
 			<td class="data">
-				<input readonly class="start" name="start" />
+				<input readonly class="duration" name="start" />
 				<input readonly class="duration" name="duration" />
-				<input readonly class="stop" name="stop" />
+				<input readonly class="number" name="stop" />
 			</td>
 		</tr>
 	</tbody> 
@@ -321,9 +319,9 @@ var onclick = function(e) {
 	var box = panel.parentNode;
 	Array.forEach(box.childNodes, function(node) {
 		if (node.nodeType !== 1) return;
-		node.style.cssText = "position: absolute; position: fixed; top: 0px; left: 0px; width: 100%; height: 0px; overflow: hidden;";
+		mui.ClassList(node).add("hidden");
 	});
-	panel.style.cssText = null;
+	mui.ClassList(panel).remove("hidden");
 	
 	var li = this.parentNode;
 	var ul = li.parentNode;
@@ -415,38 +413,6 @@ MathJax.Ajax.Load = function(file, callback) {
 MathJax.Hub.Startup.signal.Interest(signalHandler);
 MathJax.Hub.signal.Interest(signalHandler);
 
-var taskUI = {}
-taskUI.table = $("#tasks");
-taskUI.tBody = taskUI.table.tBodies[0];
-taskUI.template = taskUI.tBody.rows[0];
-taskUI.tBody.removeChild(taskUI.template);
-taskUI.template.className = "";
-taskUI.addRow = function(name, type, title, begin, end) {
-	var start = begin - beginTime, stop = end - beginTime, duration = end - begin;
-	var totalTime = endTime - beginTime;
-	var row = this.template.cloneNode(true);
-	this.tBody.appendChild(row);
-	var inputs = $$("input", row);
-	var taskType = inputs[0];
-	taskType.value = type.charAt(0).toUpperCase();
-	taskType.title = type;
-	taskType.className += " " + type;
-	var taskName = inputs[1];
-	taskName.value = name;
-	taskName.title = name;
-	if (title) taskName.title = title;
-	var data = [ start, duration, stop ]; 
-	var timeline = "start: " + start + " / duration: " + duration + " / stop: " + stop;
-	var scale = 90 / totalTime;
-	Array.forEach(data, function(val, i) {
-		var input = inputs[i+2];
-		input.value = val;
-		if (i < 2) input.style.width = val * scale + "%";
-		if (i == 1) input.className += " " + type;
-		input.title = timeline;
-	});
-}
-
 var math = {
 	count: 0,
 	lastTime: 0,
@@ -469,48 +435,39 @@ MathJax.Hub.Register.MessageHook("New Math", function(message) {
 	else data.process = duration;
 });
 
-var mathUI = {}
-mathUI.table = $("#math");
-mathUI.tBody = mathUI.table.tBodies[0];
-mathUI.template = mathUI.tBody.rows[0];
-mathUI.tBody.removeChild(mathUI.template);
-mathUI.template.className = "";
-
-mathUI.addRow = function(name, process, reprocess) {
-	var row = this.template.cloneNode(true);
-	this.tBody.appendChild(row);
-	var inputs = $$("input", row);
-	var input = inputs[0], val;
-	input.value = name;
-	input.title = name;
-	var scale = 95 / math.maxDuration;
-	input = inputs[1];
-	val = process;
-	input.value = val;
-	input.style.width = val * scale + "%";
-	input.className += " Process";
-	input = inputs[2];
-	val = reprocess;
-	input.value = val;
-	input.style.width = val * scale + "%";
-	input.className += " Reprocess";
-}
-
 // NOTE Firefox doesn't complete these actions when called as MathJax.Hub.queue.Push(function() { MathJax.Hub.Reprocess(); })
 // TODO Why not??
 // MathJax.Hub.queue.Push("MathJax.Hub.PreProcess();");
 // MathJax.Hub.queue.Push("MathJax.Hub.Process();");
 MathJax.Hub.queue.Push("MathJax.Hub.Reprocess();");
 
+var taskUI = new mui.DataTable($("#tasks"));
+var mathUI = new mui.DataTable($("#math"));
+
 MathJax.Hub.queue.Push(function() {
+	var totalTime = endTime - beginTime;
+	taskUI.scale = 90 / totalTime;
 	Object.each(performance, function(taskName, t) {
-		taskUI.addRow(taskName, t.type, null, t.begin, t.end);
+		var start = t.begin - beginTime, stop = t.end - beginTime, duration = t.end - t.begin;
+		var timeline = "start: " + start + " / duration: " + duration + " / stop: " + stop;
+		taskUI.addRow({
+			type: { value: t.type.charAt(0).toUpperCase(), title: t.type, "class": t.type },
+			name: { value: t.name, title: t.name },
+			start: { value: start, title: timeline },
+			duration: { value: duration, title: timeline, "class": t.type },
+			stop: { value: stop, title: timeline }
+		});
 	});
 });
 
 MathJax.Hub.queue.Push(function() {
+	mathUI.scale = 95 / math.maxDuration;
 	Array.forEach(math.samples, function(t) {
-		mathUI.addRow(t.name, t.process, t.reprocess);
+		mathUI.addRow({
+			name: { value: t.name, title: t.title },
+			process: { value: t.process, "class": "Process" },
+			reprocess: { value: t.reprocess, "class": "Reprocess" }
+		});
 	});
 });
 

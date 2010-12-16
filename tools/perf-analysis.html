@@ -11,6 +11,13 @@
 body {
 	background-color: #fff;
 }
+#internals {
+	float: right;
+	width: 30%;
+}
+#results {
+	margin-right: 35%;
+}
 h1 {
 	font-size: 20pt;
 }
@@ -53,7 +60,7 @@ table {
 }
 caption {
 	width: auto;
-	background-color: #ccc;
+	background-color: #eee;
 	border: 2px solid #aaa;
 	padding: 0.2em;
 	border-radius: 4px 4px 0 0;
@@ -117,6 +124,9 @@ td.small input { font-size: 0.5em; margin: 0; }
 <script src="ui.js"></script>
 <script src="config.js"></script>
 <script>
+var mui = MathJaxUI, $ = mui.$, $$ = mui.$$,
+	extend = Object.extend, each = Object.each, forEach = Array.forEach, eachWord = String.eachWord;
+
 // Default config
 Object.extend(config, {
 	script: '../MathJax.js',
@@ -127,9 +137,6 @@ Object.extend(config, {
 	static: false,
 	inlineBlock: false
 });
-
-var mui = MathJaxUI, $ = mui.$, $$ = mui.$$,
-	extend = Object.extend, each = Object.each, forEach = Array.forEach, eachWord = String.eachWord;
 
 mui.getOptions(function(key, val) {
 	val = decodeURIComponent(val);
@@ -143,14 +150,13 @@ mui.getOptions(function(key, val) {
 
 <form name="config">
 
-<label>Script location <input type="text" size="40" name="script" /></label>
 <label>Equation
 <select name="equation">
 	<option value="">Select All</option>
 	<option value="lorenz">The Lorenz Equations</option>
 	<option value="cauchy-schwarz">The Cauchy-Schwarz Inequality</option>
 	<option value="cross-product">A Cross Product Formula</option>
-	<option value="probability">The probability of getting k heads when flipping n coins is</option>
+	<option value="probability">Probability of k heads when flipping n coins</option>
 	<option value="ramanujan">An Identity of Ramanujan</option>
 	<option value="rogers-ramanujan">A Rogers-Ramanujan Identity</option>
 	<option value="maxwell">Maxwell's Equations</option>
@@ -205,8 +211,7 @@ P(E)   = {n \choose k} p^k (1-p)^{ n-k}
 <input type="submit" name="run" value="Run" />
 <br />
 
-<label class="hidden" title="The default setting for 'position' style of spans is 'static'">Static <input type="checkbox" name="static" /></label>
-<label title="The default setting for 'display' style of spans is 'inline-block'">Inline-Block <input type="checkbox" name="inlineBlock" /></label>
+<label>Script location <input type="text" size="40" name="script" /></label>
 <label>Emulate IE7 <input type="checkbox" name="emulateIE7" /></label>
 <label>Doctype
 <select name="doctype">
@@ -216,29 +221,69 @@ P(E)   = {n \choose k} p^k (1-p)^{ n-k}
 	<option value="quirks" title=''>Quirks Mode (none)</option>
 </select>
 </label>
+<br />
+<hr />
+<div id="internals">
+<label title="Timeout for math rendering to yield to the browser">processUpdateTime <input type="text" size="4" name="processUpdateTime" /></label>
+<label class="hidden" title="The default setting for 'position' style of spans is 'static'">Static <input type="checkbox" name="static" /></label>
+<label title="The default setting for 'display' style of spans is 'inline-block'">Inline-Block <input type="checkbox" name="inlineBlock" /></label>
+<script> 
+// NOTE internalOptions may only be turned OFF, otherwise they just accept the default
+var internalOptions = ("AccentBug AdjustSurd FontFaceBug negativeSkipBug PaddingWidthBug zeroWidthBug " +
+"msieAccentBug msieColorBug msieRelativeWidthBug msieMarginWidthBug msiePaddingWidthBug msieCharPaddingWidthBug msieBorderWidthBug " +
+"msieInlineBlockAlignBug msieVerticalAlignBug msiePlaceBoxBug msieClipRectBug msieNegativeSpaceBug msieItalicWidthBug " +
+"ffVerticalAlignBug " +
+"safariContextMenuBug safariNegativeSpaceBug safariVerticalAlignBug safariTextNodeBug " +
+"operaHeightBug operaVerticalAlignBug operaFontSizeBug " +
+"konquerorVerticalAlignBug").split(/\s+/);
+var buf = [];
+buf.push(
+'<table>',
+	'<caption>Internal options</caption>',
+	'<thead><tr><th>Name</th><th title="MathJax default">Default</th><th title="Clear the option if appropriate">Clear</th></tr></thead>',
+	'<tbody>'
+);
+internalOptions.forEach(function(name) {
+	buf.push(
+		'<tr><td>', name, '</td><td><input type="checkbox" name="internal.', name, '" /></td><td><input type="checkbox" name="', name, '" value="off" /></td></tr>'
+	);
+});
+buf.push(
+	'</tbody>',
+'</table>'
+);
+
+document.write(buf.join(""));
+</script>
+</div>
+
 </form>
 
 <script>
 (function() {
 
 var form = document.forms["config"];
-form["script"].value = config.script;
+eachWord("script processUpdateTime", function(name) {
+	var value = config[name];
+	if (typeof value !== "undefined") form[name].value = value;
+});
 Array.forEach(form["equation"].options, function(option) {
 	if (option.value === config.equation) option.selected = true;
 });
 form["count"].value = config.count;
-Array.forEach("static inlineBlock emulateIE7".split(/\s+/), function(name) {
+eachWord("static inlineBlock emulateIE7", function(name) {
 	form[name].checked = !!config[name];
 });
 Array.forEach(form["doctype"].options, function(option) {
 	if (option.value === config.doctype) option.selected = true;
 });
-
+Array.forEach(internalOptions, function(name) {
+	if (config[name] === "off") form[name].checked = true;
+})
 })();
 </script>
 
-<hr />
-	
+<div id="results">	
 <ul id="tabs" class="tabs">
 	<li><a href="#testBox">Test</a></li>
 	<li><a href="#tasksBox">Task Timelines</a></li>
@@ -304,13 +349,20 @@ Array.forEach(form["doctype"].options, function(option) {
 </div>
 
 </div>
+</div>
 
 <script>
 (function() {
 
 var runBox = $("#runbox");
 var height = (window.innerHeight || document.documentElement.offsetHeight) - runBox.offsetTop - document.body.offsetTop;
-$("#test").style.height = height * 0.95 + "px";
+var h = height * 0.95 + "px";
+eachWord("internals test tasksBox mathBox", function(id) {
+	var el = $("#" + id);
+	el.style.height = h;
+	el.style.overflowX = "hidden";
+	el.style.overflowY = "scroll";
+});
 var onclick = function(e) {
 	var href = this.href;
 	var m = href.split("#");
@@ -382,7 +434,8 @@ var signalHandler = function(message) {
 
 // intercept Font loading
 MathJax.Hub.Register.StartupHook("HTML-CSS Jax Ready", function() {
-	var FONT = MathJax.OutputJax["HTML-CSS"].Font;
+	var HTMLCSS = MathJax.OutputJax["HTML-CSS"];
+	var FONT = HTMLCSS.Font;
 	FONT._loadComplete = FONT.loadComplete;
 	FONT.loadComplete = function(font, n, done, status) {
 		MathJax.Hub.Startup.signal.Post({ name: "End Font", fontName: font.directory, toString: function() { return this.name; } });
@@ -393,6 +446,13 @@ MathJax.Hub.Register.StartupHook("HTML-CSS Jax Ready", function() {
 		MathJax.Hub.Startup.signal.Post({ name: "Begin Font", fontName: font.directory, toString: function() { return this.name; } });
 		return this._loadWebFont(font);
 	}
+	
+	var form = document.forms["config"];
+	Array.forEach(internalOptions, function(name) {
+		form["internal." + name].checked = HTMLCSS[name];
+		if (config[name] === "off") HTMLCSS[name] = false;
+	})
+
 });
 
 // intercept Ajax.Load
@@ -508,6 +568,7 @@ buf.push(
 '<script src="' + config.script + '" type="text/javascript">' +
 	'top.Init(MathJax);' +
     'MathJax.Hub.Config({' +
+		(config.processUpdateTime ? 'processUpdateTime: ' + config.processUpdateTime + ',' : '') +
         'jax: ["input/TeX", "output/HTML-CSS"],' +
 		'extensions: ["tex2jax.js"],' +
 		'tex2jax: { displayMath: [["$$", "$$"]] },' +

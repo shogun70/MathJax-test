@@ -356,7 +356,7 @@ methodOrder: "Measure Pad Measure Finalize".split(" "),
 Wrap: function(element) {
 	var parent = element.parentNode;
 	var wrapper = document.createElement(Box.wrapElement);
-	if (config.absPosWrapper) wrapper.style.cssText = "position: absolute; top: 0px; left: 0px;";
+	if (config.absPosWrapper) wrapper.style.cssText = "position: absolute; top: 0px; left: 0px; ";
 	parent.insertBefore(wrapper, element);
 	wrapper.appendChild(element);
 	return wrapper;
@@ -506,7 +506,7 @@ Prepare: function() {
 	});
 
 	if (config.fixedPosFrame) {
-		this.frame.style.cssText = "width: 0px; height: 0px; visbility: hidden; overflow: hidden; position: fixed; top: 0px; left: 0px; ";
+		this.frame.style.cssText = "width: 0px; height: 0px; visbility: hidden; overflow: hidden; top: 0px; left: 0px; position: fixed; ";
 	}
 	if (!config.mathRemoved) {		
 		this.frame.appendChild(this.frag.firstChild);

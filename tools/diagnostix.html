@@ -2,6 +2,7 @@
 <html>
 <head>
 <title>MathJax Diagnostix</title>
+<!-- Copyright (c) 2010 Design Science, Inc. -->
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <style>
 html {
@@ -80,9 +81,9 @@ caption {
 	background-color: #eee;
 	border: 1px solid #aaa;
 	padding: 0.2em;
-	-moz-border-radius: 4px 4px 0 0;
-	-webkit-border-radius: 4px 4px 0 0;
-	border-radius: 4px 4px 0 0;
+	-moz-border-radius: 0 4px 0 0;
+	-webkit-border-radius: 0 4px 0 0;
+	border-radius: 0 4px 0 0;
 }
 th, td {
 	border: 1px solid #aaa;
@@ -99,18 +100,29 @@ input[type=text] { width: 20em; }
 #basic tr, #basic th, #basic td {
 	border: none;
 }
+.hidden { position: absolute; position: fixed; top: 0px; left: 0px; width: 100%; height: 0px; overflow: hidden; visibility: hidden; }
 </style>
+<script src="ui.js"></script>
+<script>
+var mui = MathJaxUI, $ = mui.$, $$ = mui.$$,
+	extend = Object.extend, each = Object.each, forEach = Array.forEach, eachWord = String.eachWord;
+</script>
 </head>
 <body>
 <form action="mailto:" method="post" enctype="text/plain">
-<div class="tabbox">
-	<ul class="tabs">
-		<li><a href="#basic">Basic</a></li>
-		<li><a href="#advanced">Advanced</a></li>
+
+
+<div id="tabbox">
+	<ul id="tabs" class="tabs">
+		<li><a href="#basicPanel">Basic</a></li>
+		<li><a href="#advancedPanel">Advanced</a></li>
 	</ul>
-	<div class="tabpanels">
+
+<div id="tabpanels">
+	
+<div id="basicPanel">
 <table id="basic">
-	<caption>Common troubleshooting aids</caption>
+	<caption>Common troubleshooting checks</caption>
 	<col />
 	<col width="20%" />
 	<tbody class="template">
@@ -118,6 +130,9 @@ input[type=text] { width: 20em; }
 		<tr><td></td><td></td></tr>
 	</tbody>
 </table>
+</div>
+
+<div id="advancedPanel">
 <table id="advanced">
 	<caption>Complete view of document and MathJax properties</caption>
 	<col />
@@ -130,15 +145,54 @@ input[type=text] { width: 20em; }
 		<tr class="template"><td></td><td></td><td></td></tr>
 	</tbody>
 </table>
-	</div>
 </div>
-</form>
-</body>
-<script src="ui.js"></script>
-<script>
-var mui = MathJaxUI, $ = mui.$, $$ = mui.$$,
-	extend = Object.extend, each = Object.each, forEach = Array.forEach, eachWord = String.eachWord;
 
+</div>
+
+</div>
+	
+</form>
+<script>
+(function() {
+
+var tabpanels = $("#tabpanels");
+var height = (window.innerHeight || document.documentElement.offsetHeight) - tabpanels.offsetTop - document.body.offsetTop;
+var h = height * 0.95 + "px";
+eachWord("basicPanel advancedPanel", function(id) {
+	var el = $("#" + id);
+	el.style.height = h;
+	el.style.overflowX = "hidden";
+	el.style.overflowY = "scroll";
+});
+var onclick = function(e) {
+	var href = this.href;
+	var m = href.split("#");
+	if (m[0] !== document.URL) return;
+	var panel = $("#" + m[1]);
+	var box = panel.parentNode;
+	Array.forEach(box.childNodes, function(node) {
+		if (node.nodeType !== 1) return;
+		mui.ClassList(node).add("hidden");
+	});
+	mui.ClassList(panel).remove("hidden");
+	
+	var li = this.parentNode;
+	var ul = li.parentNode;
+	Array.forEach(ul.childNodes, function(node) {
+		if (node.nodeType !== 1) return;
+		node.className = "";
+	});
+	li.className = "selected";
+	
+	return false;
+}
+
+Array.forEach($$("a", $("#tabs")), function(link, i) { link.onclick = onclick; if (i === 0) link.onclick(); });
+
+})();
+</script>
+</body>
+<script>
 var context = (window.MathJax) ? window : parent;
 var MathJax = context.MathJax;
 

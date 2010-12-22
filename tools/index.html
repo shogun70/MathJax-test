@@ -1,0 +1,101 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+<head>
+<title>MathJax Testing Tools</title>
+<!-- Copyright (c) 2010 Design Science, Inc. -->
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<style>
+body {
+	background-color: #fff;
+}
+h1 {
+	font-size: 20pt;
+}
+label {
+	background-color: #ccc;
+	border: 2px solid #aaa;
+	display: inline-block;
+	margin: 0.2em; margin-left: 0;
+	padding: 0.2em;
+	border-radius: 4px;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+}
+table {
+	border-collapse: collapse;
+	width: 100%;
+	border: 1px solid #aaa;
+	table-layout: fixed;
+	margin: 0.2em; margin-left: 0;
+}
+caption {
+	width: auto;
+	background-color: #ccc;
+	border: 2px solid #aaa;
+	padding: 0.2em;
+	border-radius: 4px 4px 0 0;
+	-moz-border-radius: 4px 4px 0 0;
+	-webkit-border-radius: 4px 4px 0 0;
+}
+th, td {
+	border: 1px solid #aaa;
+	padding: 0.2em;
+}
+code {
+	border: 1px solid #aaa;
+	background-color: #ccc;
+}
+</style>
+</head>
+<body>
+<h1>MathJax Testing Tools</h1>
+<p>These tools are currently for internal use, and have not been rigorously tested.</p>
+
+<dl>
+	<li>
+		<dt><a href="checklist.html">checklist.html</a></dt>
+		<dd>Checks a cross-section of MathJax files highlighting success (or failure) and performance issues.
+		This must be in the same domain as the MathJax installation.</dd>
+	</li>
+	<li>
+		<dt><a href="performance.html">performance.html</a></dt>
+		<dd>Measures MathJax performance for a given page.
+		Must be in the same domain as the page to be tested.</dd>
+	</li>
+	<li>
+		<dt><a href="perf-analysis.html">perf-analysis.html</a></dt>
+		<dd>Generates pages of math and measures MathJax performance. </dd>
+	</li>
+	<li>
+		<dt><a href="layout-comparison.html">layout-comparison.html</a></dt>
+		<dd>Simulates MathJax rendering to allow comparison of various layout options.
+		Requires MathJax, but from any domain. </dd>
+	</li>
+	<li>
+		<dt><a href="layout-demo.html">layout-demo.html</a></dt>
+		<dd>Simulates MathJax rendering to allow comparison of various layout options.
+		This test-page is a reduction of layout-comparison.html.
+		Does not require MathJax.</dd>
+	</li>
+	<li>
+		<dt><a href="layout-demo2.html">layout-demo2.html</a></dt>
+		<dd>Simulates MathJax rendering to allow comparison of various markup options.
+		Does not require MathJax.</dd>
+	</li>
+	<li>
+		<dt><a href="layout-demo3.html">layout-demo3.html</a></dt>
+		<dd>Tests performance of inserting pre-generated HTML representing math.
+		This relates to the possible option of a low-quality mode (or phase) for MathJax.
+		Does not require MathJax.</dd>
+	</li>
+</dl>
+
+<p>Finally, here is the code for a javascript bookmarklet which creates a diagnostics window for a web-page.
+This code requires the MathJaxToolsDir to be configured and to be in the same domain as the page under test.
+</p>
+<blockquote><code>
+var MathJaxToolsDir = "/mathjax/tools"; var script = document.createElement("script"); script.src = MathJaxToolsDir + "/diagnostix.js"; document.getElementsByTagName("head")[0].appendChild(script); void(0);
+</code></blockquote>
+
+</body>
+</html>

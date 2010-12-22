@@ -95,7 +95,7 @@ table input {
 	border: none;
 	background-color: transparent;
 }
-input[name=type] {
+input[name="type"] {
 	text-align: center;
 	width: 1em;
 	height: 1em;
@@ -103,14 +103,14 @@ input[name=type] {
 	color: white;
 	font-weight: bold;
 }
-input[name=start] {
+input[name="start"] {
 	text-align: right;
 }
-input[name=stop] {
+input[name="stop"] {
 	text-align: left;
 	width: 9%;
 }
-input[name=duration] {
+input[name="duration"] {
 	text-align: center;
 }
 input.Action { background-color: green; color: white; }
@@ -245,7 +245,7 @@ buf.push(
 );
 internalOptions.forEach(function(name) {
 	buf.push(
-		'<tr><td>', name, '</td><td><input type="checkbox" name="internal.', name, '" /></td><td><input type="checkbox" name="', name, '" value="off" /></td></tr>'
+		'<tr><td>', name, '</td><td><input type="checkbox" name="internal.', name, '" disabled /></td><td><input type="checkbox" name="', name, '" value="off" /></td></tr>'
 	);
 });
 buf.push(
@@ -453,6 +453,7 @@ MathJax.Hub.Register.StartupHook("HTML-CSS Jax Ready", function() {
 		if (config[name] === "off") HTMLCSS[name] = false;
 	})
 
+	if (form.processUpdateTime.value) MathJax.Hub.processUpdateTime = form.processUpdateTime.value;
 });
 
 // intercept Ajax.Load
@@ -568,7 +569,6 @@ buf.push(
 '<script src="' + config.script + '" type="text/javascript">' +
 	'top.Init(MathJax);' +
     'MathJax.Hub.Config({' +
-		(config.processUpdateTime ? 'processUpdateTime: ' + config.processUpdateTime + ',' : '') +
         'jax: ["input/TeX", "output/HTML-CSS"],' +
 		'extensions: ["tex2jax.js"],' +
 		'tex2jax: { displayMath: [["$$", "$$"]] },' +

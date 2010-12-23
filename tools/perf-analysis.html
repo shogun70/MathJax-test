@@ -160,50 +160,82 @@ mui.getOptions(function(key, val) {
 	<option value="ramanujan">An Identity of Ramanujan</option>
 	<option value="rogers-ramanujan">A Rogers-Ramanujan Identity</option>
 	<option value="maxwell">Maxwell's Equations</option>
+	<option value="inline">Inline expression</option>
 </select>
 </label>
 
-<script id="lorenz" type="math/tex; mode=display">
-\begin{aligned}
+<script id="lorenz" type="text/html">
+<p><b>The Lorenz Equations</b></p>
+<p>
+\begin{align}
 \dot{x} & = \sigma(y-x) \\
 \dot{y} & = \rho x - y - xz \\
 \dot{z} & = -\beta z + xy
-\end{aligned}
+\end{align}
+</p>
 </script>
 
-<script id="cauchy-schwarz" type="math/tex; mode=display">
-\left( \sum_{k=1}^n a_k b_k \right)^2 \leq \left( \sum_{k=1}^n a_k^2 \right) \left( \sum_{k=1}^n b_k^2 \right)
+<script id="cauchy-schwarz" type="text/html">
+<p><b>The Cauchy-Schwarz Inequality</b></p>
+<p>\[
+\left( \sum_{k=1}^n a_k b_k \right)^{\!\!2} \leq
+ \left( \sum_{k=1}^n a_k^2 \right) \left( \sum_{k=1}^n b_k^2 \right)
+\]</p>
 </script>
 
-<script id="cross-product" type="math/tex; mode=display">
-\mathbf{V}_1 \times \mathbf{V}_2 =  \begin{vmatrix}
-\mathbf{i} & \mathbf{j} & \mathbf{k} \\
-\frac{\partial X}{\partial u} &  \frac{\partial Y}{\partial u} & 0 \\
-\frac{\partial X}{\partial v} &  \frac{\partial Y}{\partial v} & 0
-\end{vmatrix}
+<script id="cross-product" type="text/html">
+<p><b>A Cross Product Formula</b></p>
+<p>\[
+  \mathbf{V}_1 \times \mathbf{V}_2 =
+   \begin{vmatrix}
+    \mathbf{i} & \mathbf{j} & \mathbf{k} \\
+    \frac{\partial X}{\partial u} & \frac{\partial Y}{\partial u} & 0 \\
+    \frac{\partial X}{\partial v} & \frac{\partial Y}{\partial v} & 0 \\
+   \end{vmatrix}
+\]</p>
 </script>
 
-<script id="probability" type="math/tex; mode=display">
-P(E)   = {n \choose k} p^k (1-p)^{ n-k}
+<script id="probability" type="text/html">
+<p><b>The probability of getting k heads when flipping n coins is:</b></p>
+<p>\[P(E) = {n \choose k} p^k (1-p)^{ n-k} \]</p>
 </script>
 
-<script id="ramanujan" type="math/tex; mode=display">
-\frac{1}{\Bigl(\sqrt{\phi \sqrt{5}}-\phi\Bigr) e^{\frac25 \pi}} =
-1+\frac{e^{-2\pi}} {1+\frac{e^{-4\pi}} {1+\frac{e^{-6\pi}}
-{1+\frac{e^{-8\pi}} {1+\ldots} } } }
+<script id="ramanujan" type="text/html">
+<p><b>An Identity of Ramanujan</b></p>
+<p>\[
+   \frac{1}{(\sqrt{\phi \sqrt{5}}-\phi) e^{\frac25 \pi}} =
+     1+\frac{e^{-2\pi}} {1+\frac{e^{-4\pi}} {1+\frac{e^{-6\pi}}
+      {1+\frac{e^{-8\pi}} {1+\ldots} } } }
+\]</p>
 </script>
 
-<script id="rogers-ramanujan" type="math/tex; mode=display">
-1 +  \frac{q^2}{(1-q)}+\frac{q^6}{(1-q)(1-q^2)}+\cdots =
-\prod_{j=0}^{\infty}\frac{1}{(1-q^{5j+2})(1-q^{5j+3})},
-\quad\quad \text{for} |q|<1.
+<script id="rogers-ramanujan" type="text/html">
+<p><b>A Rogers-Ramanujan Identity</b></p>
+<p>\[
+  1 +  \frac{q^2}{(1-q)}+\frac{q^6}{(1-q)(1-q^2)}+\cdots =
+    \prod_{j=0}^{\infty}\frac{1}{(1-q^{5j+2})(1-q^{5j+3})},
+     \quad\quad \text{for $|q|<1$}.
+\]</p>
 </script>
 
-<script id="maxwell" type="math/tex; mode=display">
-\begin{aligned}
-\nabla \times \vec{\mathbf{B}} -\, \frac1c\, \frac{\partial\vec{\mathbf{E}}}{\partial t} & = \frac{4\pi}{c}\vec{\mathbf{j}} \\   \nabla \cdot \vec{\mathbf{E}} & = 4 \pi \rho \\
-\nabla \times \vec{\mathbf{E}}\, +\, \frac1c\, \frac{\partial\vec{\mathbf{B}}}{\partial t} & = \vec{\mathbf{0}} \\
-\nabla \cdot \vec{\mathbf{B}} & = 0 \end{aligned}
+<script id="maxwell" type="text/html">
+<p><b>Maxwell's Equations</b></p>
+<p>
+\begin{align}
+  \nabla \times \vec{\mathbf{B}} -\, \frac1c\, \frac{\partial\vec{\mathbf{E}}}{\partial t} & = \frac{4\pi}{c}\vec{\mathbf{j}} \\
+  \nabla \cdot \vec{\mathbf{E}} & = 4 \pi \rho \\
+  \nabla \times \vec{\mathbf{E}}\, +\, \frac1c\, \frac{\partial\vec{\mathbf{B}}}{\partial t} & = \vec{\mathbf{0}} \\
+  \nabla \cdot \vec{\mathbf{B}} & = 0
+\end{align}
+</p>
+</script>
+
+<script id="inline" type="text/html">
+<p>Finally, while display equations look good for a page of samples, the
+ability to mix math and text in a paragraph is also important.  This
+expression \(\sqrt{3x-1}+(1+x)^2\) is an example of an inline equation.  As
+you see, MathJax equations can be used this way as well, without unduly
+disturbing the spacing between lines.</p>
 </script>
 
 <label title="How many equations to place in test page">Count <input type="text" name="count" /></label>
@@ -534,6 +566,16 @@ MathJax.Hub.queue.Push(function() {
 
 }
 </script>
+<script id="__MathJax__" type="text/plain">
+	top.Init(MathJax);
+    MathJax.Hub.Config({
+        jax: ["input/TeX", "output/HTML-CSS"],
+		extensions: ["tex2jax.js"],
+		tex2jax: { inlineMath: [["$","$"],["\\(","\\)"]] },
+		skipStartupTypeset: false,
+		"HTML-CSS": { showMathMenu: false, scale: 100 }
+    });
+</script>
 <script>
 if (config.run) window.onload = function() {
 
@@ -567,14 +609,7 @@ buf.push('</style>\n');
 
 buf.push(
 '<script src="' + config.script + '" type="text/javascript">' +
-	'top.Init(MathJax);' +
-    'MathJax.Hub.Config({' +
-        'jax: ["input/TeX", "output/HTML-CSS"],' +
-		'extensions: ["tex2jax.js"],' +
-		'tex2jax: { displayMath: [["$$", "$$"]] },' +
-		'skipStartupTypeset: false,' +
-		'"HTML-CSS": { showMathMenu: false, scale: 100 }' +
-    '});' +
+	$("#__MathJax__").innerHTML +
 '<\/script>\n'	
 );
 
@@ -587,7 +622,7 @@ Array.forEach(select.options, function(option) {
 	if (!equation) return;
 	if (!all && !option.selected) return;
 	var script = $("#" + equation);
-	math += '<p>$$' + script.innerHTML + '$$</p>\n';
+	math += '<div>' + script.innerHTML + '</div>\n';
 });
 for (var i=0; i<config.count; i++) buf.push(math);
 
